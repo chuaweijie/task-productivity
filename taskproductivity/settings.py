@@ -72,13 +72,7 @@ WSGI_APPLICATION = 'taskproductivity.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Database setting in local_settings.py
 
 
 # Password validation
@@ -123,3 +117,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+try:
+   from .local_settings import *
+except ImportError:
+    raise Exception("A local_settings.py file is required to run this project")
