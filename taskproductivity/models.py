@@ -20,5 +20,5 @@ class Tasks(models.Model):
 class Sessions(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name="sessions")
     total_time = models.PositiveIntegerField(null=True)
-    start = models.DateTimeField()
+    start = models.DateTimeField(auto_now_add=True)
     end = models.DateTimeField(null=True)
