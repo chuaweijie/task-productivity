@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'taskproductivity.apps.TaskproductivityConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,6 +75,7 @@ WSGI_APPLICATION = 'capstone.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 # Database setting in local_settings.py
 
+AUTH_USER_MODEL = "taskproductivity.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
