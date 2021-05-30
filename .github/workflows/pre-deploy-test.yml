@@ -27,8 +27,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Set environment variables
+      env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
     - name: Run Tests
       run: |
         python manage.py test
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
