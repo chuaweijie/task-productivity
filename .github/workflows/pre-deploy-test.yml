@@ -11,8 +11,7 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
-      POSTGRES_PASSWORD: postgres
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/task_productivity
     strategy:
       max-parallel: 4
       matrix:
@@ -21,6 +20,8 @@ jobs:
     - uses: harmon758/postgresql-action@v1
       with:
         postgresql version: '12'
+        postgresql db: 'task_productivity'
+        postgresql password: 'postgres'
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
