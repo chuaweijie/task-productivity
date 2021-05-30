@@ -10,18 +10,25 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/task_productivity
+    
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGReS_DB: task_productivity
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.7, 3.8, 3.9]
     steps:
-    - uses: harmon758/postgresql-action@v1
-      with:
-        postgresql version: '12'
-        postgresql db: 'task_productivity'
-        postgresql password: 'postgres'
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -34,3 +41,5 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/task_productivity
