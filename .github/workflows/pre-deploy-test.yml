@@ -10,7 +10,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    
+    env:
+        DATABASE_URL: "postgres://postgres:postgres@localhost:5432/task_productivity"
     services:
       postgres:
         image: postgres
@@ -41,5 +42,3 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/task_productivity
