@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      POSTGRES_PASSWORD: postgres
     strategy:
       max-parallel: 4
       matrix:
