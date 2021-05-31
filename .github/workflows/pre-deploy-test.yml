@@ -17,7 +17,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGReS_DB: task_productivity
+          POSTGRES_DB: task_productivity
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
