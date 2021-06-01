@@ -1,0 +1,11 @@
+{% extends "taskproductivity/layout.html" %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        <div id="div_new_post" name="div_new_post"></div>  
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+
+{% block script %}
+{% endblock %}
