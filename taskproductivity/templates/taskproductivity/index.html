@@ -1,10 +1,16 @@
 {% extends "taskproductivity/layout.html" %}
 
 {% block body %}
-    {% if user.is_authenticated %}
-        <div id="div_new_post" name="div_new_post"></div>  
-    {% endif %}
-    {{ block.super }}
+    <div class="container p-5 mb-4 text-center">
+        <h1 class="display-4 fw-bold">Accomplish more with better task management.</h1>
+        <h5 class="pt-3">Task Productivty helps you get better at task estimation and completion.</h5>
+        <div class="mt-4 mb-3">
+            <a href="{% url 'signup' %}" class="btn btn-success fs-5" role="button">Sign up for free</a>
+        </div>
+        <div>
+            <a href="{% url 'login' %}" class="link-dark fs-5" >Already have an account? Login</a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}

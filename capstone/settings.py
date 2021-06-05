@@ -121,6 +121,6 @@ STATIC_ROOT = PurePosixPath(BASE_DIR).joinpath('staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 try:
-   from .local_settings import *
+   from .dev_settings import *
 except ImportError:
     raise Exception("A local_settings.py file is required to run this project")
