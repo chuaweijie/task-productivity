@@ -16,10 +16,6 @@ class HomepageTestCase(TestCase):
 class UITestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.web_driver = None
-
-class UITestCaseChrome(UITestCase):
-    def setUp(self):
-        self.web_driver = webdriver.Chrome()
     
     def test_homepage(self):
         url = self.live_server_url
@@ -34,10 +30,17 @@ class UITestCaseChrome(UITestCase):
         self.assertEqual(len(btn_signup), 1)
         self.assertEqual(len(featured_btn_login), 1)
         self.assertEqual(len(featured_btn_signup), 1)
-        self.assertEqual(btn_login.text, "Log In")
-        self.assertEqual(btn_signup.text, "Sign up for free")
-        self.assertEqual(featured_btn_login.text, "Already have an account? Login")
-        self.assertEqual(featured_btn_signup.text, "Sign up for free")
+        self.assertEqual(btn_login[0].get_attribute('text'), "Log In")
+        self.assertEqual(btn_signup[0].get_attribute('text'), "Sign Up")
+        self.assertEqual(featured_btn_login[0].get_attribute('text'), "Already have an account? Login")
+        self.assertEqual(featured_btn_signup[0].get_attribute('text'), "Sign up for free")
+    
+    def tearDown(self):
+        self.web_driver.quit()
+
+class UITestCaseChrome(UITestCase):
+    def setUp(self):
+        self.web_driver = webdriver.Chrome()
 
 class UITestCaseEdge(UITestCase):
     def setUp(self):
