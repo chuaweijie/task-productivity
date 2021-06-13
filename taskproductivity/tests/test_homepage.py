@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
+from msedge.selenium_tools import Edge, EdgeOptions
 
 class HomepageTestCase(TestCase):
 
@@ -13,7 +14,7 @@ class HomepageTestCase(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-class UITestCase(StaticLiveServerTestCase):
+class UITestCase(object):
     def setUp(self):
         self.web_driver = None
     
@@ -38,18 +39,23 @@ class UITestCase(StaticLiveServerTestCase):
     def tearDown(self):
         self.web_driver.quit()
 
-class UITestCaseChrome(UITestCase):
+class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
     def setUp(self):
-        self.web_driver = webdriver.Chrome()
+        options = webdriver.ChromeOptions()
+        options.headless = True
 
-class UITestCaseEdge(UITestCase):
-    def setUp(self):
-        self.web_driver = webdriver.Edge()
+        # Set Chrome to run headless so that it can work in automated tests
+        self.web_driver = webdriver.Chrome(options=options)
 
-class UITestCaseFirefox(UITestCase):
+class UITestCaseEdge(UITestCase, StaticLiveServerTestCase):
     def setUp(self):
-        self.web_driver = webdriver.Firefox()
+        options = EdgeOptions()
+        options.use_chromium = True
+        options.add_argument("headless")
+        self.web_driver = Edge(options=options)
 
-class UITestCaseSafari(UITestCase):
+class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
     def setUp(self):
-        self.web_driver = webdriver.Safari()
+        options = webdriver.FirefoxOptions()
+        options.headless = True
+        self.web_driver = webdriver.Firefox(options=options)
