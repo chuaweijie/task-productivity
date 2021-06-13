@@ -2,7 +2,6 @@ from django.test import TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
-from msedge.selenium_tools import Edge, EdgeOptions
 
 class HomepageTestCase(TestCase):
 
