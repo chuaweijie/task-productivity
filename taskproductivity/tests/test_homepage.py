@@ -47,12 +47,12 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         # Set Chrome to run headless so that it can work in automated tests
         self.web_driver = webdriver.Chrome(options=options)
 
-class UITestCaseEdge(UITestCase, StaticLiveServerTestCase):
+'''class UITestCaseEdge(UITestCase, StaticLiveServerTestCase):
     def setUp(self):
         options = EdgeOptions()
         options.use_chromium = True
         options.add_argument("headless")
-        self.web_driver = Edge(options=options)
+        self.web_driver = Edge(options=options)'''
 
 class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
     def setUp(self):
