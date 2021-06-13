@@ -23,13 +23,13 @@
                         {% else %}
                         {% endif %}
                     </ul>
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-1 offset-md-9">
-                                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    <div class="container-fluid">
+                        <div class="row justify-content-end">
+                            <div class="col-md-auto">
+                                <a class="nav-link link-dark" name="btn_login" href="{% url 'login' %}">Log In</a>
                             </div>
-                            <div class="col-md-2">
-                                <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                            <div class="col-md-auto">
+                                <a class="btn btn-success" name="btn_signup" href="{% url 'signup' %}">Sign Up</a>
                             </div>
                         </div>
                     </div>

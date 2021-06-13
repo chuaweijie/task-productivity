@@ -27,11 +27,17 @@ class UITestCaseChrome(UITestCase):
 
         btn_login = self.web_driver.find_elements_by_name("btn_login")
         btn_signup = self.web_driver.find_elements_by_name("btn_signup")
+        featured_btn_login = self.web_driver.find_elements_by_name("featured_btn_login")
+        featured_btn_signup = self.web_driver.find_elements_by_name("featured_btn_signup")
 
-        self.assertEqual(len(btn_login), 2)
+        self.assertEqual(len(btn_login), 1)
         self.assertEqual(len(btn_signup), 1)
+        self.assertEqual(len(featured_btn_login), 1)
+        self.assertEqual(len(featured_btn_signup), 1)
         self.assertEqual(btn_login.text, "Log In")
         self.assertEqual(btn_signup.text, "Sign up for free")
+        self.assertEqual(featured_btn_login.text, "Already have an account? Login")
+        self.assertEqual(featured_btn_signup.text, "Sign up for free")
 
 class UITestCaseEdge(UITestCase):
     def setUp(self):

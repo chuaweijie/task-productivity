@@ -1,14 +1,32 @@
 {% extends "taskproductivity/layout.html" %}
+{% load static %}
 
 {% block body %}
     <div class="container p-5 mb-4 text-center">
         <h1 class="display-4 fw-bold">Accomplish more with better task management.</h1>
         <h5 class="pt-3">Task Productivty helps you get better at task estimation and completion.</h5>
         <div class="mt-4 mb-3">
-            <a href="{% url 'signup' %}" class="btn btn-success fs-5" role="button">Sign up for free</a>
+            <a href="{% url 'signup' %}" class="btn btn-success fs-5" name="featured_btn_signup" role="button">Sign up for free</a>
         </div>
         <div>
-            <a href="{% url 'login' %}" class="link-dark fs-5" >Already have an account? Login</a>
+            <a href="{% url 'login' %}" class="link-dark fs-5" name="featured_btn_login">Already have an account? Login</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <img class="img-fluid" src="{% static 'iconmonstr-laptop-6-240.png' %}">
+            </div>
+            <div class="col-auto">
+                <h5>TRACK TASKS</h5>
+                <p>Keep a list of tasks that are important to you.</p>
+                <h5>CAPTURE TIME SPENT</h5>
+                <p>Keep track of how long you've spent on each task.</p>
+                <h5>ESTIMATE BETTER</h5>
+                <p>Keep track of your task estimation so that you can improve your estimation.</p>
+                <h5>PRODUCTIVITY METRICS</h5>
+                <p>Some detailed description of the feature</p>
+            </div>
         </div>
     </div>
 {% endblock %}
