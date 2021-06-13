@@ -2,4 +2,3 @@ Django
 psycopg2
 dj_database_url
 selenium
-msedge-selenium-tools
