@@ -13,6 +13,7 @@ class HomepageTestCase(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
+# Using object because the child classes will be using mixins so that I don't need to write complicated test commands.
 class UITestCase(object):
     def setUp(self):
         self.web_driver = None
