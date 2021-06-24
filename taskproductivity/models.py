@@ -23,13 +23,13 @@ class Sessions(models.Model):
     start = models.DateTimeField(auto_now_add=True)
     end = models.DateTimeField(null=True)
 
-class Recovery(models.Model):
+class Recoveries(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery")
     key = models.CharField(max_length=128)
     time = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
 
-class Verification(models.Model):
+class Verifications(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification")
     key = models.CharField(max_length=128)
     time = models.DateTimeField(auto_now_add=True)

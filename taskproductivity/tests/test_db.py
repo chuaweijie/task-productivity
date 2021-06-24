@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta
 
-from taskproductivity.models import User, Tasks, Sessions
+from taskproductivity.models import User, Tasks, Sessions, Verification, Recovery
 
 class ModelsTestCase(TestCase):
     def setUp(self):
@@ -17,6 +17,7 @@ class ModelsTestCase(TestCase):
 
         # create a session to reflect the used time in task 1. 
         self.task1_session1 = Sessions.objects.create(task=self.user1_task1, total_time = "5", end = self.user1_task1.creation_date + timedelta(minutes=5))
+
 
     def test_user_task_count(self):
         """Check the count of users"""
