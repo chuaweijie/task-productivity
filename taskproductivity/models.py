@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    pass
+    verified_account = models.BooleanField(default=False)
 
 class Tasks(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
@@ -22,3 +22,15 @@ class Sessions(models.Model):
     total_time = models.PositiveIntegerField(null=True)
     start = models.DateTimeField(auto_now_add=True)
     end = models.DateTimeField(null=True)
+
+class Recovery(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery")
+    key = models.CharField(max_length=128)
+    time = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
+
+class Verification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification")
+    key = models.CharField(max_length=128)
+    time = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
