@@ -11,6 +11,9 @@ class ViewTestCase(ViewBaseCase):
 
 # Using object because the child classes will be using mixins so that I don't need to write complicated test commands.
 class UITestCase(UIBaseCase):
+    def setUp(self):
+        super().setUp()
+        
     def test_homepage(self):
         """Check that all of the important elements exist and have the correct name"""
         url = self.live_server_url

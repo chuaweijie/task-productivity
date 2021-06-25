@@ -1,6 +1,8 @@
+import time
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .base_case import ViewBaseCase, UIBaseCase
-from django.db.transaction import TransactionManagementError
+from django.db import IntegrityError
 
 from selenium import webdriver
 
@@ -13,7 +15,6 @@ class ViewTestCase(ViewBaseCase):
             'password':'1234', 
             'confirmation':'1234'
         }
-
         self._csrf_post("/signup", data)
         self.client.get("/logout")
 
@@ -31,22 +32,24 @@ class ViewTestCase(ViewBaseCase):
         }
 
         # Test the case where we have the same username. 
-        with self.assertRaises(TransactionManagementError):
-            self._csrf_post("/signup", data)
+        response = self._csrf_post("/signup", data)
+        self.assertEqual(response.context['message'], "Username and/or email is already registered.")
+        self.assertEqual(response.status_code, 400)
 
         # Test the case where we have the same email. 
         data['username'] = 'test2'
         data['email'] = 'test@test.com'
 
-        with self.assertRaises(TransactionManagementError):
-            self._csrf_post("/signup", data)
+        response = self._csrf_post("/signup", data)
+        self.assertEqual(response.context['message'], "Username and/or email is already registered.")
+        self.assertEqual(response.status_code, 400)
         
         # Test the case where passwords are not the same. 
         data['email'] = 'test2@test.com'
         data['confirmation'] = '4321'
-        response = self._csrf_post("/register", data)
+        response = self._csrf_post("/signup", data)
         self.assertEqual(response.context['message'], "Passwords must match.")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
 
         # Test the case where all the data are ok. 
         data['confirmation'] = '1234'
@@ -54,11 +57,9 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.url, '/')
         self.assertEqual(response.status_code, 302)
 
-
 class UITestCase(UIBaseCase):
     def setUp(self):
         super().setUp()
-        self._signup_user("test", "test@test.com", "1234", "1234")
 
     # Write the test for both browsers here. 
     def _signup_user(self, username, email, password, confirmation):
@@ -112,6 +113,7 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.web_driver = webdriver.Chrome(options=options)
+        self._signup_user("test", "test@test.com", "1234", "1234")
         # For the rest of the test methods, please refer to UITestCase
 
 class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
@@ -121,3 +123,4 @@ class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
         options = webdriver.FirefoxOptions()
         options.headless = True
         self.web_driver = webdriver.Firefox(options=options)
+        self._signup_user("test", "test@test.com", "1234", "1234")

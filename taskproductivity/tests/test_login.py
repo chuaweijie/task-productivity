@@ -9,7 +9,10 @@ class ViewTestCase(ViewBaseCase):
         response = self.client.get("/login")
         self.assertEqual(response.status_code, 200)
 
-class UITestCase(UIBaseCase): 
+class UITestCase(UIBaseCase):
+    def setUp(self):
+        super().setUp()
+
     # Write the test for both browsers here.   
     def test_login(self):
         url = self.live_server_url
