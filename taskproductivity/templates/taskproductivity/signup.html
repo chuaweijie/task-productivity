@@ -5,7 +5,7 @@
     <div class="text-center login">
         <main class="form-signin">
             <form action="{% url 'login' %}" method="post">
-                <img class="mb-4" src="/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+                <img class="mb-4" src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="72" height="57">
                 <h1 class="h3 mb-3 fw-normal">Sign up for better productivity</h1>
                 <div class="form-floating">
                     <input type="text" class="form-control" id="username" name="username" placeholder="username">
@@ -31,5 +31,5 @@
 
 {% block script %}
     <link href="{% static 'taskproductivity/css/signup.css' %}" rel="stylesheet">
-    <script src="{% static 'taskproductivity/css/signup.js' %}"></script>
+    <script src="{% static 'taskproductivity/js/signup.js' %}"></script>
 {% endblock %}
