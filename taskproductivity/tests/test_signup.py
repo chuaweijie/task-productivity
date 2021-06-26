@@ -31,6 +31,10 @@ class ViewTestCase(ViewBaseCase):
             'confirmation':'1234'
         }
 
+        # Test that the API will not accept POST without csrf. 
+        response = self.client.post("/signup", data)
+        self.assertEqual(response.status_code, 403)
+
         # Test the case where we have the same username. 
         response = self._csrf_post("/signup", data)
         self.assertEqual(response.context['message'], "Username and/or email is already registered.")
@@ -56,6 +60,39 @@ class ViewTestCase(ViewBaseCase):
         response = self._csrf_post("/signup", data)
         self.assertEqual(response.url, '/')
         self.assertEqual(response.status_code, 302)
+    
+    def test_username_check(self):
+        """This is to test if the duplicated username check works or not"""
+        data = {
+            'username': 'test', 
+        }
+        # Test that the API will not accept POST without csrf. 
+        response = self.client.post("/username", data)
+        self.assertEqual(response.status_code, 403)
+
+        response = self._csrf_post("/username", data)
+        self.assertEqual(response.json(), {"unique": False})
+
+        data['username'] = 'test3'
+        response = self._csrf_post("/username", data)
+        self.assertEqual(response.json(), {"unique": True})
+    
+    def test_email_check(self):
+        """This is to test if the duplicated email check works or not"""
+        data = {
+            'email': 'test@test.com', 
+        }
+
+        # Test that the API will not accept POST without csrf. 
+        response = self.client.post("/email", data)
+        self.assertEqual(response.status_code, 403)
+
+        response = self._csrf_post("/email", data)
+        self.assertEqual(response.json(), {"unique": False})
+
+        data['email'] = 'test3@test.com'
+        response = self._csrf_post("/email", data)
+        self.assertEqual(response.json(), {"unique": True})
 
 class UITestCase(UIBaseCase):
     def setUp(self):

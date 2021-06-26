@@ -38,6 +38,9 @@
         </nav>
         
         <div class="px-3">
+            {% if message %}
+                <div name="div-msg">{{ message }}</div>
+            {% endif %}
             {% block body %}
             {% endblock %}
         </div>

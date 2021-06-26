@@ -7,6 +7,8 @@ class ViewBaseCase(TestCase):
     
     def _csrf_post(self, url, data):
         resp = self.client.get(url)
+        if resp.status_code != 200:
+            resp = self.client.get('/')
         data['csrfmiddlewaretoken'] = resp.cookies['csrftoken'].value
         response = self.client.post(url, data)
         return response

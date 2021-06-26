@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import IntegrityError, transaction
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 
 from taskproductivity.models import User
 
@@ -64,3 +65,35 @@ def signup(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "taskproductivity/signup.html")
+
+def email(request):
+    if request.method == "POST":
+        email = request.POST["email"]
+        response = {
+            "unique": False
+        }
+
+        try:
+            User.objects.get(email=email)
+        except ObjectDoesNotExist: 
+            response["unique"] = True
+            
+        return JsonResponse(response)
+    else:
+        raise PermissionDenied
+
+def username(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        response = {
+            "unique": False
+        }
+
+        try:
+            User.objects.get(username=username)
+        except ObjectDoesNotExist: 
+            response["unique"] = True
+
+        return JsonResponse(response)
+    else:
+        raise PermissionDenied
