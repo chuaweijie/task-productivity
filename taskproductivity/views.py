@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -68,29 +70,30 @@ def signup(request):
 
 def email(request):
     if request.method == "POST":
-        email = request.POST["email"]
+        data = json.loads(request.body)
         response = {
             "unique": False
         }
 
         try:
-            User.objects.get(email=email)
+            User.objects.get(email=data.get("email"))
         except ObjectDoesNotExist: 
             response["unique"] = True
             
         return JsonResponse(response)
     else:
         raise PermissionDenied
+        
 
 def username(request):
-    if request.method == "POST":
-        username = request.POST["username"]
+    if request.method == "POST":            
+        data = json.loads(request.body)
         response = {
             "unique": False
         }
 
         try:
-            User.objects.get(username=username)
+            User.objects.get(username=data.get("username"))
         except ObjectDoesNotExist: 
             response["unique"] = True
 

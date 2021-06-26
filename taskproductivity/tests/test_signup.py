@@ -2,7 +2,6 @@ import time
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .base_case import ViewBaseCase, UIBaseCase
-from django.db import IntegrityError
 
 from selenium import webdriver
 
@@ -70,11 +69,11 @@ class ViewTestCase(ViewBaseCase):
         response = self.client.post("/username", data)
         self.assertEqual(response.status_code, 403)
 
-        response = self._csrf_post("/username", data)
+        response = self._csrf_post("/username", data, True)
         self.assertEqual(response.json(), {"unique": False})
 
         data['username'] = 'test3'
-        response = self._csrf_post("/username", data)
+        response = self._csrf_post("/username", data, True)
         self.assertEqual(response.json(), {"unique": True})
     
     def test_email_check(self):
@@ -87,12 +86,12 @@ class ViewTestCase(ViewBaseCase):
         response = self.client.post("/email", data)
         self.assertEqual(response.status_code, 403)
 
-        response = self._csrf_post("/email", data)
-        self.assertEqual(response.json(), {"unique": False})
+        response = self._csrf_post("/email", data, True)
+        self.assertEqual(response.json(), {"unique": False}, True)
 
         data['email'] = 'test3@test.com'
-        response = self._csrf_post("/email", data)
-        self.assertEqual(response.json(), {"unique": True})
+        response = self._csrf_post("/email", data, True)
+        self.assertEqual(response.json(), {"unique": True}, True)
 
 class UITestCase(UIBaseCase):
     def setUp(self):
