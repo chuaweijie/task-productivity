@@ -28,12 +28,18 @@
                     </ul>
                     <div class="container-fluid">
                         <div class="row justify-content-end">
-                            <div class="col-md-auto">
-                                <a class="nav-link link-dark" name="btn_login" href="{% url 'login' %}">Log In</a>
-                            </div>
-                            <div class="col-md-auto">
-                                <a class="btn btn-success" name="btn_signup" href="{% url 'signup' %}">Sign Up</a>
-                            </div>
+                            {% if user.is_authenticated %}
+                                <div class="col-md-auto">
+                                    <a class="nav-link link-dark" name="btn_logut" href="{% url 'logout' %}">Logout</a>
+                                </div>
+                            {% else %}
+                                <div class="col-md-auto">
+                                    <a class="nav-link link-dark" name="btn_login" href="{% url 'login' %}">Log In</a>
+                                </div>
+                                <div class="col-md-auto">
+                                    <a class="btn btn-success" name="btn_signup" href="{% url 'signup' %}">Sign Up</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -42,7 +48,9 @@
         
         <div class="px-3">
             {% if message %}
-                <div name="div-msg">{{ message }}</div>
+                <div class="alert alert-{{ type }}" role="alert">
+                    {{ message }}
+                </div>
             {% endif %}
             {% block body %}
             {% endblock %}

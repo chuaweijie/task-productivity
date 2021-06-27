@@ -16,20 +16,21 @@ def index(request):
     # How to check if the user is already logged in? 
     return render(request, "taskproductivity/index.html")
 
-def login_view(request, user):
+def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
-
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            print(request.session.items())
+            print(f"User is authenticated {request.user.is_authenticated}")
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "taskproductivity/login.html", {
+                "type": "danger",
                 "message": "Invalid username and/or password."
             })
     else:
@@ -51,6 +52,7 @@ def signup(request):
         
         if password != confirmation:
             return render(request, "taskproductivity/signup.html", {
+                "type": "warning",
                 "message": "Passwords must match."
             }, status=400)
 
@@ -61,6 +63,7 @@ def signup(request):
                 user.save()
         except IntegrityError:
             return render(request, "taskproductivity/signup.html", {
+                "type": "warning",
                 "message": "Username and/or email is already registered."
             }, status=400)
         login(request, user)
