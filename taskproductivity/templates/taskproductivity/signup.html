@@ -2,4 +2,35 @@
 {% load static %}
 
 {% block body %}
+    <div class="text-center login">
+        <main class="form-signin">
+            <form action="{% url 'signup' %}" method="post">
+                {% csrf_token %}
+                <img class="mb-4" src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="72" height="57">
+                <h1 class="h3 mb-3 fw-normal">Sign up for better productivity</h1>
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="username">
+                    <label for="username">Username</label>
+                </div>
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+                    <label for="email">Email address</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                    <label for="password">Password</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="confirmation" name="confirmation" placeholder="Confirm Password">
+                    <label for="confirmation">Confirm Password</label>
+                </div>
+                <button class="w-100 btn btn-lg btn-success" id="signup" disabled="true" type="submit">Sign up</button>
+            </form>
+        </main>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <link href="{% static 'taskproductivity/css/signup.css' %}" rel="stylesheet">
+    <script type="module" src="{% static 'taskproductivity/js/signup.js' %}"></script>
 {% endblock %}

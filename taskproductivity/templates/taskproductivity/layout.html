@@ -13,7 +13,10 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light px-3 justify-content-end">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">Task Productivity</a>
+                <a class="navbar-brand" href="/">
+                    <img src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="32" height="32" class="d-inline-block align-text-top">
+                    Task Productivity
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -25,12 +28,18 @@
                     </ul>
                     <div class="container-fluid">
                         <div class="row justify-content-end">
-                            <div class="col-md-auto">
-                                <a class="nav-link link-dark" name="btn_login" href="{% url 'login' %}">Log In</a>
-                            </div>
-                            <div class="col-md-auto">
-                                <a class="btn btn-success" name="btn_signup" href="{% url 'signup' %}">Sign Up</a>
-                            </div>
+                            {% if user.is_authenticated %}
+                                <div class="col-md-auto">
+                                    <a class="nav-link link-dark" name="btn_logut" href="{% url 'logout' %}">Logout</a>
+                                </div>
+                            {% else %}
+                                <div class="col-md-auto">
+                                    <a class="nav-link link-dark" name="btn_login" href="{% url 'login' %}">Log In</a>
+                                </div>
+                                <div class="col-md-auto">
+                                    <a class="btn btn-success" name="btn_signup" href="{% url 'signup' %}">Sign Up</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -38,6 +47,11 @@
         </nav>
         
         <div class="px-3">
+            {% if message %}
+                <div class="alert alert-{{ type }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
             {% block body %}
             {% endblock %}
         </div>
