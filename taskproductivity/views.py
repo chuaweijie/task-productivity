@@ -64,6 +64,7 @@ def signup(request):
                 "message": "Username and/or email is already registered."
             }, status=400)
         login(request, user)
+        # Should redirect to task in the future
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "taskproductivity/signup.html")

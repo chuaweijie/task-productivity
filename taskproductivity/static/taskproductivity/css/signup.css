@@ -41,10 +41,16 @@ body {
     z-index: 2;
 }
 
-.form-signin input[type="email"] {
-    margin-bottom: -1px;
+#username {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+#email,#password {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 #confirmation {
