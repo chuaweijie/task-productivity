@@ -11,7 +11,7 @@ class Tasks(models.Model):
     description = models.TextField(null=True, blank=True)
     priority = models.PositiveSmallIntegerField(null=True, blank=True)
     completed = models.BooleanField(default=False)
-    expected_time = models.PositiveIntegerField()
+    expected_time = models.PositiveIntegerField(null=True)
     time_used = models.PositiveIntegerField(null=True)
     deadline = models.DateTimeField(null=True, blank=True)
     finish_date = models.DateTimeField(null=True)
@@ -24,12 +24,14 @@ class Sessions(models.Model):
     start = models.DateTimeField(auto_now_add=True)
     end = models.DateTimeField(null=True)
 
+# Table unused. Will be utilized for future implementation
 class Recoveries(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery")
     key = models.CharField(max_length=128)
     time = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
 
+# Table unused. Will be utilized for future implementation
 class Verifications(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification")
     key = models.CharField(max_length=128)

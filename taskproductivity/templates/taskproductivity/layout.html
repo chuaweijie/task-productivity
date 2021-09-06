@@ -13,17 +13,15 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light px-3 justify-content-end">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    <img src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="32" height="32" class="d-inline-block align-text-top">
-                    Task Productivity
-                </a>
+                <a class="navbar-brand" href="/">Task Productivity</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbar">
                     <ul class="navbar-nav mr-auto">
                         {% if user.is_authenticated %}
-                        {% else %}
+                            <a class="nav-link link-dark" name="btn_tasks" href="{% url 'tasks' %}">Tasks</a>
+                            <a class="nav-link link-dark" name="btn_report" href="{% url 'report' %}">Report</a>
                         {% endif %}
                     </ul>
                     <div class="container-fluid">
@@ -48,7 +46,7 @@
         
         <div class="px-3">
             {% if message %}
-                <div class="alert alert-{{ type }}" role="alert">
+                <div class="alert alert-{{ type }}" id="alert" role="alert">
                     {{ message }}
                 </div>
             {% endif %}
