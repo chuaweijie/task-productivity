@@ -1,26 +1,17 @@
+// Code adapted from https://github.com/mdn/web-speech-api/tree/master/speech-color-changer
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 
-//var colors = [ 'aqua' , 'azure' , 'beige', 'bisque', 'black', 'blue', 'brown', 'chocolate', 'coral', 'crimson', 'cyan', 'fuchsia', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'indigo', 'ivory', 'khaki', 'lavender', 'lime', 'linen', 'magenta', 'maroon', 'moccasin', 'navy', 'olive', 'orange', 'orchid', 'peru', 'pink', 'plum', 'purple', 'red', 'salmon', 'sienna', 'silver', 'snow', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'white', 'yellow'];
-//var grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;'
-
+// Create the SpeechRecognition object. 
 var recognition = new SpeechRecognition();
-//var speechRecognitionList = new SpeechGrammarList();
-//speechRecognitionList.addFromString(grammar, 1);
-//recognition.grammars = speechRecognitionList;
 recognition.continuous = false;
+// This will need to be the same as the content that is created
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-/*var colorHTML= '';
-colors.forEach(function(v, i, a){
-  console.log(v, i);
-  colorHTML += '<span style="background-color:' + v + ';"> ' + v + ' </span>';
-});
-hints.innerHTML = 'Tap/click then say a color to change the background color of the app. Try ' + colorHTML + '.';*/
-
+// Once the start button has been clicked, start the recognition and reset all the texts.
 document.getElementById("btn_start").onclick = function() {
     recognition.start();
     console.log('Ready to receive a color command.');
@@ -52,13 +43,10 @@ recognition.onresult = function(event) {
     const words_len = words.length;
     const spoken_words_len = spoken_words.length;
 
-    console.log("Lowered_words");
-    console.log(lowered_words);
-    console.log("spoken_words");
-    console.log(spoken_words);
-
+    // Show what is recognized by the speech to text engine
     status.textContent = 'I heard "' + spoken + '".';
     
+    // Scoring logic
     let correct_count = 0;
     let result = document.createElement("h3");
     result.className = "comparison"
@@ -77,6 +65,7 @@ recognition.onresult = function(event) {
                     result.appendChild(txt);
                 }
             }
+            // Highlight the words that are incorrect in red
             else {
                 const span = document.createElement("span");
                 span.className = "wrong";
@@ -121,6 +110,8 @@ recognition.onresult = function(event) {
             }
             last_index = i;
         }
+
+        // This is the logic to highlight blanks if the returned text is longer than the original text.
         const diff = spoken_words_len - last_index - 1;
         const before_last = diff - 1;
         for (let i = 0; i < diff; i++) {
@@ -132,11 +123,13 @@ recognition.onresult = function(event) {
         }
     }
 
+    // The logic to add penalty when the recognized text is longer than the original text. 
     if (words_len < spoken_words_len) {
         const diff = spoken_words_len - words_len;
         correct_count -= diff;
     }
 
+    // The scoring logic is the total correct words divided by the word length multiply by 100.
     const total_score = correct_count / words_len * 100;
 
     score.textContent = "Score: " + Math.round(total_score * 10) / 10;
