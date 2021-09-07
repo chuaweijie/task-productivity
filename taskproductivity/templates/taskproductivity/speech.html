@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Open Durian Speech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="shortcut icon" type="image/x-icon" href="https://www.opendurian.com/favicon.ico"/>
+    <link href="{% static 'taskproductivity/css/speech.css' %}" rel="stylesheet">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark px-3 justify-content-end" id="nav">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="https://www.opendurian.com/durian-yellow.png" alt="" width="32" height="32" class="d-inline-block align-text-top">
+                Open Durian Speech Prototype
+            </a>
+        </div>
+    </nav>
+    <div class="text-center mt-5">
+        <p class="hints"></p>
+        <textarea id="sentence" name="sentence" rows="4" cols="50" class="p-2" placeholder="Type the sentence you want to practice here. Due to technical reasons, please do not include any punctuations."></textarea>
+        <div>
+            <button type="button" id="btn_start" class="btn text-white">Start</button>
+        </div>
+        <div class="text-center mt-5">
+            <p class="font-weight-bold" id="status">Status: Idle</p>
+        </div>
+        <div class="text-center mt-1">
+            <h3 id="score"></h3>
+        </div>
+        <div class="text-center mt-1" id="comparison">
+        </div>
+    </div>
+    <script type="module" src="{% static 'taskproductivity/js/speech.js' %}"></script>
+  </body>
+</html>

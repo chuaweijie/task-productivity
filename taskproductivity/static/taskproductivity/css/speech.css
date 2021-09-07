@@ -1,0 +1,17 @@
+nav, #btn_start {
+    background-color: #74a446;
+    border-color: #74a446;
+}
+
+.comparison {
+    color: #74a446;
+}
+
+.wrong {
+    color: red;
+}
+
+textarea:focus {
+    outline: none !important;
+    box-shadow: 0 0 10px #74a446;
+  }

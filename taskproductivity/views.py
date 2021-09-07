@@ -104,3 +104,6 @@ def username(request):
         return JsonResponse(response)
     else:
         raise PermissionDenied
+
+def speech(request):
+    return render(request, "taskproductivity/speech.html")
