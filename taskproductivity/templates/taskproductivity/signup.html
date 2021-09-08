@@ -11,18 +11,30 @@
                 <div class="form-floating">
                     <input type="text" class="form-control" id="username" name="username" placeholder="username">
                     <label for="username">Username</label>
+                    <div class="invalid-feedback" id="div_username_feedback">
+                        Invalid username.
+                    </div>
                 </div>
                 <div class="form-floating">
                     <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
                     <label for="email">Email address</label>
+                    <div class="invalid-feedback" id="div_email_feedback">
+                        Invalid email address format.
+                    </div>
                 </div>
                 <div class="form-floating">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                     <label for="password">Password</label>
+                    <div class="invalid-feedback" id="div_password_feedback">
+                        Invalid password. <br>Passwords must be at least 8 characters long.
+                    </div>
                 </div>
                 <div class="form-floating">
                     <input type="password" class="form-control" id="confirmation" name="confirmation" placeholder="Confirm Password">
                     <label for="confirmation">Confirm Password</label>
+                    <div class="invalid-feedback" id="div_confirmation_feedback">
+                        Invalid password. Please ensure your passwords are the same.
+                    </div>
                 </div>
                 <button class="w-100 btn btn-lg btn-success" id="signup" disabled="true" type="submit">Sign up</button>
             </form>

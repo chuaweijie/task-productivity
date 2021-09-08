@@ -102,27 +102,34 @@ class UITestCase(UIBaseCase):
     def test_incorrect_password_registration(self):
         '''Testing the registration when passwords are incorrect.'''
         self._signup_user("wpass", "wpass@wpass.com", "12345678", "87654321", False)
-        self.assertEqual(self.chrome_driver.current_url, self.live_server_url+'/register')
-        div_msg = self.chrome_driver.find_elements_by_name("div-msg")
-        self.assertEqual(len(div_msg), 1)
-        self.assertEqual(div_msg[0].text, "Passwords must match.")
+        input_confirmation = self.web_driver.find_element_by_id("confirmation")
+        self.assertEqual(input_confirmation.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
+        self.assertEqual(div_feedback.text, "Invalid password. Please ensure your passwords are the same.")
+
+    def test_short_password_registration(self):
+        '''Testing the registration when passwords are incorrect.'''
+        self._signup_user("wpass", "wpass@wpass.com", "1234", "1234", False)
+        input_password = self.web_driver.find_element_by_id("password")
+        self.assertEqual(input_password.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_password_feedback")
+        self.assertEqual(div_feedback.text, "Invalid password.\nPasswords must be at least 8 characters long.")
 
     def test_repeated_username_registration(self):
         '''Testing the registration when username already exists.'''
         self._signup_user("test", "test2@test.com", "12345678", "12345678", False)
-
-        div_msg = self.chrome_driver.find_elements_by_name("div-msg")
-        self.assertEqual(len(div_msg), 1)
-        self.assertEqual(div_msg[0].text, "It looks like test belongs to an existing account. Try again with a different username.")
+        input_username = self.web_driver.find_element_by_id("username")
+        self.assertEqual(input_username.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_username_feedback")
+        self.assertEqual(div_feedback.text, "Invalid username.")
     
     def test_repeated_email_registration(self):
         '''Testing the registration when the email entered exists in the system.'''
         self._signup_user("test2", "test@test.com", "12345678", "12345678", False)
-
-        div_msg = self.chrome_driver.find_elements_by_name("div-msg")
-        self.assertEqual(len(div_msg), 1)
-        self.assertEqual(div_msg[0].text, "It looks like test@test.com belongs to an existing account. Try again with a different email address.")
-
+        input_email = self.web_driver.find_element_by_id("email")
+        self.assertEqual(input_email.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_email_feedback")
+        self.assertEqual(div_feedback.text, "Invalid email address format.")
 
     def test_registration(self):
         '''Testing the registration of a user'''
