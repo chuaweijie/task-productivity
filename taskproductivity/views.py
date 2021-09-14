@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.core.paginator import Paginator
 
 from taskproductivity.models import User
 
@@ -25,9 +26,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            print(request.session.items())
-            print(f"User is authenticated {request.user.is_authenticated}")
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("tasks"))
         else:
             return render(request, "taskproductivity/login.html", {
                 "type": "danger",
@@ -68,7 +67,7 @@ def signup(request):
             }, status=400)
         login(request, user)
         # Should redirect to task in the future
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse("tasks"))
     else:
         return render(request, "taskproductivity/signup.html")
 
@@ -105,5 +104,20 @@ def username(request):
     else:
         raise PermissionDenied
 
-def speech(request):
-    return render(request, "taskproductivity/speech.html")
+def tasks(request):
+    if request.method == "GET":
+        return render(request, "taskproductivity/tasks.html")
+    else:
+        raise PermissionDenied
+
+def task_data(request, user_id, page_no):
+    response = {}
+    return JsonResponse(response)
+
+def man_task(request):
+    response = {}
+    return JsonResponse(response)
+
+
+def report(request):
+    return render(request, "taskproductivity/report.html")
