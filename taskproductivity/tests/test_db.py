@@ -23,23 +23,6 @@ class ModelsTestCase(TestCase):
 
         # Create a recovery
         self.recovery = Recoveries.objects.create(user=self.user1, key="RecoveryKey")
-
-    def test_user_task_count(self):
-        """Check the count of users"""
-        user = User.objects.get(username="user1")
-        self.assertEqual(user.tasks.count(), 2)
-
-        user = User.objects.get(username="user2")
-        self.assertEqual(user.tasks.count(), 0)
-
-    def test_task_session_count(self):
-        """Check the count of tasks"""
-        tasks = Tasks.objects.filter(user=self.user1)
-
-        session_count = 1
-        for task in tasks:
-            self.assertEqual(task.sessions.count(), session_count)
-            session_count -= 1
     
     def test_recovery_count(self):
         """Check the count of recovery"""
