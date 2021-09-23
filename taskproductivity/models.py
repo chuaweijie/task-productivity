@@ -7,8 +7,8 @@ class User(AbstractUser):
 
 class ERDates(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
-    entry = models.DateField(blank=True)
-    renewal = models.DateField(blank=True)
+    entry = models.DateField(null=True)
+    renewal = models.DateField(null=True)
     active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField(auto_now=True)
