@@ -5,24 +5,13 @@ class User(AbstractUser):
     email = models.CharField(max_length=256, unique=True)
     verified_account = models.BooleanField(default=False)
 
-class Tasks(models.Model):
+class ERDates(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
-    title = models.CharField(max_length=256)
-    description = models.TextField(null=True, blank=True)
-    priority = models.PositiveSmallIntegerField(null=True, blank=True)
-    completed = models.BooleanField(default=False)
-    expected_time = models.PositiveIntegerField(null=True)
-    time_used = models.PositiveIntegerField(null=True)
-    deadline = models.DateTimeField(null=True, blank=True)
-    finish_date = models.DateTimeField(null=True)
+    entry = models.DateField(blank=True)
+    renewal = models.DateField(blank=True)
+    active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField(auto_now=True)
-
-class Sessions(models.Model):
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name="sessions")
-    total_time = models.PositiveIntegerField(null=True)
-    start = models.DateTimeField(auto_now_add=True)
-    end = models.DateTimeField(null=True)
 
 # Table unused. Will be utilized for future implementation
 class Recoveries(models.Model):
