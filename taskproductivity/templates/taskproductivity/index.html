@@ -3,10 +3,10 @@
 
 {% block body %}
     <div class="container p-5 mb-4 text-center">
-        <h1 class="display-4 fw-bold">Accomplish more with better task management.</h1>
-        <h5 class="pt-3">Task Productivty helps you get better at task estimation and completion.</h5>
+        <h1 class="display-4 fw-bold">Never forget your 90 days reporting again</h1>
+        <h5 class="pt-3">90 Days Reporting Tracker helps you calculate and remind you when to do your 90 days reporting</h5>
         <div class="mt-4 mb-3">
-            <a href="{% url 'signup' %}" class="btn btn-success fs-5" name="featured_btn_signup" role="button">Sign up for free</a>
+            <a href="{% url 'signup' %}" class="btn btn-primary fs-5" name="featured_btn_signup" role="button">Sign up for free</a>
         </div>
         <div>
             <a href="{% url 'login' %}" class="link-dark fs-5" name="featured_btn_login">Already have an account? Login</a>
@@ -14,18 +14,20 @@
     </div>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-6">
-                <img class="img-fluid" src="{% static 'taskproductivity/img/iconmonstr-laptop-6-240.png' %}">
+            <div class="col-6 pb-4">
+                <img class="img-fluid" src="{% static 'taskproductivity/img/90-days-240.png' %}">
             </div>
             <div class="col-auto">
-                <h5>TRACK TASKS</h5>
-                <p>Keep a list of tasks that are important to you.</p>
-                <h5>CAPTURE TIME SPENT</h5>
-                <p>Keep track of how long you've spent on each task.</p>
-                <h5>ESTIMATE BETTER</h5>
-                <p>Keep track of your task estimation so that you can improve your estimation.</p>
-                <h5>PRODUCTIVITY METRICS</h5>
-                <p>Some detailed description of the feature</p>
+                <h5>TRACK THE NEXT REPORTING DATE</h5>
+                <p>Keep track of the date you need to do 90 days reporting.</p>
+                <h5>TRACK WHEN CAN YOU DO ONLINE REPORTING</h5>
+                <p>Automatically calculate the period of when can you do online reporting.</p>
+                <h5>EMAIL REMINDERS</h5>
+                <p>Receive email reminders about 90 days reporting</p>
+                <h5>IMPORT EVENT TO YOUR FAVORITE CALENDAR</h5>
+                <p>Import the events to your favorite calendar client.</p>
+                <h5>CALCULATE FROM ARRIVAL DATE</h5>
+                <p>Calculate your next reporting date from your date of arrival.</p>
             </div>
         </div>
     </div>
