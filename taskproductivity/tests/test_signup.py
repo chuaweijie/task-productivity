@@ -8,14 +8,7 @@ from selenium import webdriver
 class ViewTestCase(ViewBaseCase): 
     def setUp(self):
         super().setUp()
-        data = {
-            'username': 'test', 
-            'email': 'test@test.com', 
-            'password':'1234', 
-            'confirmation':'1234'
-        }
-        self._csrf_post("/signup", data)
-        self.client.get("/logout")
+        self._setup_default_user()
 
 
     def test_signup_page(self):

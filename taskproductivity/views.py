@@ -31,7 +31,7 @@ def login_view(request):
             return render(request, "taskproductivity/login.html", {
                 "type": "danger",
                 "message": "Invalid username and/or password."
-            })
+            }, status=401)
     else:
         return render(request, "taskproductivity/login.html")
 

@@ -20,6 +20,15 @@ class ViewBaseCase(TestCase):
             response = self.client.post(url, data)
         return response
 
+    def _setup_default_user(self):
+        data = {
+            'username': 'test', 
+            'email': 'test@test.com', 
+            'password':'1234', 
+            'confirmation':'1234'
+        }
+        self._csrf_post("/signup", data)
+        self.client.get("/logout")
 
 class UIBaseCase(object):
     def setUp(self):
