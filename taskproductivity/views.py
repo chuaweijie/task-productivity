@@ -1,4 +1,4 @@
-import json, hashlib, time
+import json, hashlib
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -8,6 +8,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.utils import timezone
+
+from datetime import timedelta
 
 from taskproductivity.models import User, Recoveries
 
@@ -132,11 +135,32 @@ def recovery(request):
         # Mode switcher
         if mode == "trigger":
             print("in trigger")
-            user = User.objects.get(email=email)
-            recovery_data = user.recovery
-            if recovery_data == None:
-                hash = hashlib.sha384(b""+email+time.time()).hexdigest()
-                print(f"hash: {hash}")
+            user = User.objects.filter(email__exact=email)
+            if user.count() > 0:
+                recovery_data = user[0].recovery
+                # Hash the user's email and the current time
+                key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
+                hash = hashlib.sha384(key.encode('utf-8')).hexdigest()
+
+                # Create recovery request if no past requests exists
+                if recovery_data.count() == 0:
+                    Recoveries.objects.create(user=user[0], key=hash)
+                else:
+                    old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
+                    # Only create new entry if past request is more than 5 minutes old to prevent spanning.
+                    timediff = timezone.now() - old_keys[0].time
+                    if timediff > timedelta(minutes=5):
+                        old_keys.update(active=False)
+                        Recoveries.objects.create(user=user[0], key=hash)
+                        # Need to write email sending here.
+                    else:
+                        return render(request, "taskproductivity/recovery.html", {
+                            "type": "warning",
+                            "message": "Please try to rest your password again after 5 minutes"
+                        }, status=400)
+            elif mode == "reset":
+                print("Reset password to be written")
+                print(user.count())
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie

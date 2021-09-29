@@ -1,3 +1,5 @@
+import time
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .base_case import ViewBaseCase, UIBaseCase
 from taskproductivity.models import  Recoveries, User
@@ -17,7 +19,7 @@ class ViewTestCase(ViewBaseCase):
         }
         self._csrf_post("/recovery", data)
         self.user = User.objects.get(email=self.email)
-        self.recovery_key = self.user.recovery.key
+        self.recovery_key = Recoveries.objects.filter(user=self.user, active=True)
 
     def test_recovery_page(self):
         """Check the recovery page."""
@@ -75,8 +77,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_recovery_page_with_correct_email(self):
         """Check the recovery page when a wrong email is provided"""
-        self.user = User.objects.get(email=self.email)
-        recoveries_count_before = self.user.recovery.get(active=True).count()
+        recoveries_count_before = Recoveries.objects.filter(user=self.user, active=True)
         data = {
             'email': self.email,
             'mode': "trigger"
@@ -85,7 +86,7 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context[0].get("message"), "We sent an email to test@test.com with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
         self.assertEqual(response.context[0].get("type"), "success")
-        recoveries_count_after = Recoveries.objects.get(user=self.user, active=True).count()
+        recoveries_count_after = Recoveries.objects.filter(user=self.user, active=True)
         self.assertEqual(recoveries_count_before, recoveries_count_after)
 
 
