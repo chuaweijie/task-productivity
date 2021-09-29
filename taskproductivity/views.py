@@ -1,4 +1,4 @@
-import json
+import json, hashlib, time
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -9,7 +9,7 @@ from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
 
-from taskproductivity.models import User
+from taskproductivity.models import User, Recoveries
 
 # Create your views here.
 @ensure_csrf_cookie
@@ -125,6 +125,18 @@ def report(request):
 
 @ensure_csrf_cookie
 def recovery(request):
+    if request.method == "POST":
+        email = request.POST["email"]
+        mode = request.POST["mode"]
+
+        # Mode switcher
+        if mode == "trigger":
+            print("in trigger")
+            user = User.objects.get(email=email)
+            recovery_data = user.recovery
+            if recovery_data == None:
+                hash = hashlib.sha384(b""+email+time.time()).hexdigest()
+                print(f"hash: {hash}")
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie

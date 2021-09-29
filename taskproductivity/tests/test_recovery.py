@@ -17,7 +17,6 @@ class ViewTestCase(ViewBaseCase):
         }
         self._csrf_post("/recovery", data)
         self.user = User.objects.get(email=self.email)
-        print(self.user.recovery)
         self.recovery_key = self.user.recovery.key
 
     def test_recovery_page(self):
