@@ -71,6 +71,7 @@ def signup(request):
     else:
         return render(request, "taskproductivity/signup.html")
 
+# route for the frontend js to check if email exists or not. 
 def email(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -87,7 +88,7 @@ def email(request):
     else:
         raise PermissionDenied
         
-
+# route for the frontend js to check if username exists or not. 
 def username(request):
     if request.method == "POST":            
         data = json.loads(request.body)
@@ -121,3 +122,15 @@ def man_task(request):
 
 def report(request):
     return render(request, "taskproductivity/report.html")
+
+@ensure_csrf_cookie
+def recovery(request):
+    return render(request, "taskproductivity/recovery.html")
+
+@ensure_csrf_cookie
+def recovery_key(request, key=None):
+    if key is None:
+        return render(request, "taskproductivity/index.html", {
+                "type": "danger",
+                "message": "Invalid recovery key"
+            }, status=401)
