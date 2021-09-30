@@ -10,6 +10,8 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.utils import timezone
 
+from .utils import send_email
+
 from datetime import timedelta
 
 from taskproductivity.models import User, Recoveries
@@ -141,10 +143,13 @@ def recovery(request):
                 # Hash the user's email and the current time
                 key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
                 hash = hashlib.sha384(key.encode('utf-8')).hexdigest()
-
+                
                 # Create recovery request if no past requests exists
                 if recovery_data.count() == 0:
                     Recoveries.objects.create(user=user[0], key=hash)
+                    result = send_email()
+                    print(result.status_code)
+                    print(result.json())
                 else:
                     old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
                     # Only create new entry if past request is more than 5 minutes old to prevent spanning.
@@ -152,7 +157,9 @@ def recovery(request):
                     if timediff > timedelta(minutes=5):
                         old_keys.update(active=False)
                         Recoveries.objects.create(user=user[0], key=hash)
-                        # Need to write email sending here.
+                        result = send_email()
+                        print(result.status_code)
+                        print(result.json())
                     else:
                         return render(request, "taskproductivity/recovery.html", {
                             "type": "warning",
