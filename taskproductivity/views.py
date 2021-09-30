@@ -143,11 +143,16 @@ def recovery(request):
                 # Hash the user's email and the current time
                 key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
                 hash = hashlib.sha384(key.encode('utf-8')).hexdigest()
-                
+                sender = "noreply@weijie.info"
+                sender_name = "90 Days Reporting Tracker"
+                to = email
+                to_name = user[0].first_name + " " + user[0].last_name
+                subject = "90 Days Reporting Tracker - Forgot your password?"
+                HTMLPart = "Dear "+ to_name + ",<h4>Forgot your password?</h4><p>Don't worry, it happens!</p>To create a new password, just click this button:<div><a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'  role='button' data-bs-toggle='button'>Create a new password</a></div><div>Link doesn't work?</br>Copy the following link to your browser address bar:</br><a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>https://task-productivity.herokuapp.com/reset_password/" + hash + "</a></div><div><p>Thank you,</br>90 Days Reporting Tracker</p></div>"
                 # Create recovery request if no past requests exists
                 if recovery_data.count() == 0:
                     Recoveries.objects.create(user=user[0], key=hash)
-                    result = send_email()
+                    result = send_email(sender, sender_name, to, to_name, subject, HTMLPart)
                     print(result.status_code)
                     print(result.json())
                 else:
@@ -157,7 +162,7 @@ def recovery(request):
                     if timediff > timedelta(minutes=5):
                         old_keys.update(active=False)
                         Recoveries.objects.create(user=user[0], key=hash)
-                        result = send_email()
+                        result = send_email(sender, sender_name, to, to_name, subject, HTMLPart)
                         print(result.status_code)
                         print(result.json())
                     else:
@@ -171,7 +176,7 @@ def recovery(request):
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie
-def recovery_key(request, key=None):
+def reset_password(request, key=None):
     if key is None:
         return render(request, "taskproductivity/index.html", {
                 "type": "danger",

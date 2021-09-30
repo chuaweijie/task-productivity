@@ -28,7 +28,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_change_pass_wo_key(self):
         """Test without recovery key"""
-        response = self.client.get("/recovery_key")
+        response = self.client.get("/reset_password")
         self.assertEqual(response.status_code, 401)
         
         # Check for the correct error message. 
@@ -38,7 +38,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_fake_key(self):
         """Trying to reach the change password page with a fake key"""
-        response = self.client.get("/recovery_key/12345678971234")
+        response = self.client.get("/reset_password/12345678971234")
         self.assertEqual(response.status_code, 401)
         
         # Check for the correct error message. 
@@ -48,7 +48,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_correct_key_change_password(self):
         """Try reaching with correct key and change password"""
-        response = self.client.get("/recovery_key/"+self.recovery_key)
+        response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
         old_password = self.user.password
         recovery = Recoveries.objects.get(key=self.recovery_key)

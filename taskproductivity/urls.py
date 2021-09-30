@@ -12,5 +12,5 @@ urlpatterns = [
     path("task_data/<int:page_no>", views.task_data, name="task_data"),
     path("report", views.report, name="report"),
     path("recovery", views.recovery, name="recovery"),
-    path("recovery_key/<str:key>", views.recovery_key, name="recovery_key"),
+    path("reset_password/<str:key>", views.reset_password, name="reset_password"),
 ]
