@@ -12,7 +12,6 @@ class ViewTestCase(ViewBaseCase):
         self._setup_default_user()
         
         # Setup the recovery with the correct flow to test the recovery flow
-        self.email = 'test@test.com'
         data = {
             'email': self.email,
             'mode': "trigger"

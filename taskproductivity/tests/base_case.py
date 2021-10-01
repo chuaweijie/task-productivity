@@ -21,9 +21,10 @@ class ViewBaseCase(TestCase):
         return response
 
     def _setup_default_user(self):
+        self.email = "test@test.com"
         data = {
             'username': 'test', 
-            'email': 'test@test.com', 
+            'email': self.email, 
             'password':'1234', 
             'confirmation':'1234'
         }
