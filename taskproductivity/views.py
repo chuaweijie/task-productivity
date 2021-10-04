@@ -179,32 +179,46 @@ def recovery(request):
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie
-def reset_password(request, key=None):
+def reset_password(request, key=None):    
+    if request.method == "GET":
+        if key is not None:
+            keys = Recoveries.objects.filter(key=key, active=True).order_by('-time')
+            if keys.count() > 0:
+                return render(request, "taskproductivity/reset.html", {
+                    "key": key
+                })
 
-    if request.method == "POST":
+        # When no key or an incorrect key is provided.
+        return render(request, "taskproductivity/index.html", {
+                "type": "danger",
+                "message": "Invalid recovery key"
+            }, status=401)
+
+    elif request.method == "POST":
         recovery_key = request.POST["key"]
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         old_keys = Recoveries.objects.filter(key=recovery_key, active=True).order_by('-time')
         timediff = timezone.now() - old_keys[0].time
-        if old_keys.count() == 0 or timediff > timedelta(hours=1):
-            return render(request, "taskproductivity/recovery.html", {
-                "type": "Error",
-                "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
-            }, status=400)
+        if old_keys.count() > 0 or timediff <= timedelta(hours=1):
+            if password == confirmation:
+                user = User.get(old_keys[0].user)
+                user.set_password(password)
+                user.save()
+                return render(request, "taskproductivity/login.html", {
+                    "type": "success",
+                    "message": "You've successfully changed your password. Please login now."
+                }, status=200)
+            
+            # If passwords doesn't match
+            return render(request, "taskproductivity/reset.html", {
+                "key": key,
+                "type": "warning",
+                "message": "Passwords don't match. Please make sure they are the same and try again."
+            }, status=401)
 
-    elif request.method == "GET":
-        if key is None:
-            return render(request, "taskproductivity/index.html", {
-                    "type": "danger",
-                    "message": "Invalid recovery key"
-                }, status=401)
-        
-        return render(request, "taskproductivity/reset.html", {
-            "key": key
-        })
-
-    
-    #Reset Logic
-    
-                # Write the logic. 
+        # Invalid key or expired key
+        return render(request, "taskproductivity/recovery.html", {
+            "type": "Error",
+            "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
+        }, status=400)
