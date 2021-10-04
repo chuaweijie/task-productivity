@@ -132,57 +132,79 @@ def report(request):
 def recovery(request):
     if request.method == "POST":
         email = request.POST["email"]
-        mode = request.POST["mode"]
 
-        # Mode switcher
-        if mode == "trigger":
-            print("in trigger")
-            user = User.objects.filter(email__exact=email)
-            if user.count() > 0:
-                recovery_data = user[0].recovery
-                # Hash the user's email and the current time
-                key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
-                hash = hashlib.sha224(key.encode('utf-8')).hexdigest()
+        user = User.objects.filter(email__exact=email)
+        if user.count() > 0:
+            recovery_data = user[0].recovery
+            # Hash the user's email and the current time
+            key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
+            hash = hashlib.sha224(key.encode('utf-8')).hexdigest()
+            
+            # Custom emaild data according to email template of mailjet.
+            email_data = {
+                "sender": "noreply@weijie.info",
+                "sender_name": "90 Days Reporting Tracker",
+                "to": email,
+                "to_name": user[0].first_name + " " + user[0].last_name,
+                "subject": "90 Days Reporting Tracker - Forgot your password?",
+                "password_reset_button": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>Create a new password</a>",
+                "password_reset_link": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>https://task-productivity.herokuapp.com/reset_password/" + hash + "</a>"
+            }
 
-                email_data = {
-                    "sender": "noreply@weijie.info",
-                    "sender_name": "90 Days Reporting Tracker",
-                    "to": email,
-                    "to_name": user[0].first_name + " " + user[0].last_name,
-                    "subject": "90 Days Reporting Tracker - Forgot your password?",
-                    "password_reset_button": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>Create a new password</a>",
-                    "password_reset_link": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>https://task-productivity.herokuapp.com/reset_password/" + hash + "</a>"
-                }
-                # Create recovery request if no past requests exists
-                if recovery_data.count() == 0:
+            # Template ID from mailjet. 
+            template_id = 3221171
+
+            # Create recovery request if no past requests exists
+            if recovery_data.count() == 0:
+                Recoveries.objects.create(user=user[0], key=hash)
+                result = send_email(email_data, template_id)
+                print(result.status_code)
+                print(result.json())
+            else:
+                old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
+                # Only create new entry if past request is more than 5 minutes old to prevent spanning.
+                timediff = timezone.now() - old_keys[0].time
+                if timediff > timedelta(minutes=5):
+                    old_keys.update(active=False)
                     Recoveries.objects.create(user=user[0], key=hash)
-                    result = send_email(email_data, 3221171)
+                    result = send_email(email_data, template_id)
                     print(result.status_code)
                     print(result.json())
                 else:
-                    old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
-                    # Only create new entry if past request is more than 5 minutes old to prevent spanning.
-                    timediff = timezone.now() - old_keys[0].time
-                    if timediff > timedelta(minutes=5):
-                        old_keys.update(active=False)
-                        Recoveries.objects.create(user=user[0], key=hash)
-                        result = send_email(email_data, 3221171)
-                        print(result.status_code)
-                        print(result.json())
-                    else:
-                        return render(request, "taskproductivity/recovery.html", {
-                            "type": "warning",
-                            "message": "Please try to rest your password again after 5 minutes"
-                        }, status=400)
-            elif mode == "reset":
-                print("Reset password to be written")
-                print(user.count())
+                    return render(request, "taskproductivity/recovery.html", {
+                        "type": "warning",
+                        "message": "Please try to rest your password again after 5 minutes"
+                    }, status=400)
+
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie
 def reset_password(request, key=None):
-    if key is None:
-        return render(request, "taskproductivity/index.html", {
-                "type": "danger",
-                "message": "Invalid recovery key"
-            }, status=401)
+
+    if request.method == "POST":
+        recovery_key = request.POST["key"]
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+        old_keys = Recoveries.objects.filter(key=recovery_key, active=True).order_by('-time')
+        timediff = timezone.now() - old_keys[0].time
+        if old_keys.count() == 0 or timediff > timedelta(hours=1):
+            return render(request, "taskproductivity/recovery.html", {
+                "type": "Error",
+                "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
+            }, status=400)
+
+    elif request.method == "GET":
+        if key is None:
+            return render(request, "taskproductivity/index.html", {
+                    "type": "danger",
+                    "message": "Invalid recovery key"
+                }, status=401)
+        
+        return render(request, "taskproductivity/reset.html", {
+            "key": key
+        })
+
+    
+    #Reset Logic
+    
+                # Write the logic. 

@@ -11,11 +11,8 @@ class ViewTestCase(ViewBaseCase):
         super().setUp()
         self._setup_default_user()
         
-        # Setup the recovery with the correct flow to test the recovery flow
-        data = {
-            'email': self.email,
-            'mode': "trigger"
-        }
+        # Setup the recovery with the correct flow to test the recovery flow. To change the email, please go to base_case.py
+        data = {'email': self.email,}
         self._csrf_post("/recovery", data)
         self.user = User.objects.get(email=self.email)
         self.recovery_key = Recoveries.objects.filter(user=self.user, active=True)
@@ -54,19 +51,16 @@ class ViewTestCase(ViewBaseCase):
         data = {
             'password': '4321',
             'confirmation': '4321',
-            'mode': "reset"
+            'key': self.recovery_key
         }
-        self._csrf_post("/recovery", data)
+        self._csrf_post("/reset_password", data)
         self.assertFalse(recovery.active)
         self.assertNotEqual(old_password,self.user.password)
 
     def test_recovery_page_with_wrong_email(self):
         """Check the recovery page when a wrong email is provided"""
         recoveries_before = Recoveries.objects.all()
-        data = {
-            'email': 'wrong@wrong.com',
-            'mode': "trigger"
-        }
+        data = {'email': 'wrong@wrong.com'}
         response = self._csrf_post("/recovery", data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context[0].get("message"), "We sent an email to wrong@wrong.com with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
@@ -77,13 +71,10 @@ class ViewTestCase(ViewBaseCase):
     def test_recovery_page_with_correct_email(self):
         """Check the recovery page when a wrong email is provided"""
         recoveries_count_before = Recoveries.objects.filter(user=self.user, active=True)
-        data = {
-            'email': self.email,
-            'mode': "trigger"
-        }
+        data = {'email': self.email}
         response = self._csrf_post("/recovery", data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context[0].get("message"), "We sent an email to test@test.com with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
+        self.assertEqual(response.context[0].get("message"), "We sent an email to " + self.email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
         self.assertEqual(response.context[0].get("type"), "success")
         recoveries_count_after = Recoveries.objects.filter(user=self.user, active=True)
         self.assertEqual(recoveries_count_before, recoveries_count_after)
