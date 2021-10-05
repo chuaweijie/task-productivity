@@ -1,8 +1,12 @@
 import time
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.utils import timezone
+
 from .base_case import ViewBaseCase, UIBaseCase
 from taskproductivity.models import  Recoveries, User
+
+from datetime import timedelta
 
 from selenium import webdriver
 
@@ -16,7 +20,6 @@ class ViewTestCase(ViewBaseCase):
         self.user = User.objects.get(email=self.email)
         self.recovery_key = "12345678"
         # Manually create the key to skip repeated email request. Email request will be tested in test_recovery_page_with_correct_email and test_recovery_page_with_wrong_email
-        Recoveries.objects.create(user=self.user, key=self.recovery_key)
 
     def test_recovery_page(self):
         """Check the recovery page."""
@@ -35,6 +38,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_fake_key(self):
         """Trying to reach the change password page with a fake key"""
+        Recoveries.objects.create(user=self.user, key=self.recovery_key)
         response = self.client.get("/reset_password/12345678971234")
         self.assertEqual(response.status_code, 401)
         
@@ -44,19 +48,21 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.context[0].get("type"), "danger")
     
     def test_correct_key_change_password(self):
-        """Try reaching with correct key and change password"""
+        """Try to reach change password page with correct key and change password"""
+        Recoveries.objects.create(user=self.user, key=self.recovery_key)
         response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
         old_password = self.user.password
-        recovery = Recoveries.objects.get(key=self.recovery_key)
         data = {
             'password': '4321',
             'confirmation': '4321',
             'key': self.recovery_key
         }
         self._csrf_post("/reset_password", data)
+        recovery = Recoveries.objects.get(key=self.recovery_key)
         self.assertFalse(recovery.active)
-        self.assertNotEqual(old_password,self.user.password)
+        new_password = User.objects.get(email=self.email).password
+        self.assertNotEqual(old_password, new_password)
 
     def test_recovery_page_with_wrong_email(self):
         """Check the recovery page when a wrong email is provided"""

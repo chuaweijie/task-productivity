@@ -132,7 +132,6 @@ def report(request):
 def recovery(request):
     if request.method == "POST":
         email = request.POST["email"]
-
         user = User.objects.filter(email__exact=email)
         if user.count() > 0:
             recovery_data = user[0].recovery
@@ -153,7 +152,6 @@ def recovery(request):
 
             # Template ID from mailjet. 
             template_id = 3221171
-
             if recovery_data.count() > 0:
                 old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
                 # Only create new entry if past request is more than 5 minutes old to prevent spanning.
@@ -206,7 +204,7 @@ def reset_password(request, key=None):
             timediff = timezone.now() - old_keys[0].time
             if  timediff <= timedelta(hours=1):
                 if password == confirmation:
-                    user = User.get(old_keys[0].user)
+                    user = User.objects.get(username=old_keys[0].user)
                     user.set_password(password)
                     user.save()
                     old_keys.update(active=False)
