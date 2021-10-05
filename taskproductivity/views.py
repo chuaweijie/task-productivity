@@ -174,7 +174,7 @@ def recovery(request):
         # The system will show this message regardless if the email exists or not so that hackers will not know if the email is in our system or not. 
         return render(request, "taskproductivity/recovery.html", {
                     "type": "success",
-                    "message": "Please check your email for the recovery email"
+                    "message": "We've sent an email to " + email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder."
                 }, status=200)
                 
     return render(request, "taskproductivity/recovery.html")
@@ -209,6 +209,7 @@ def reset_password(request, key=None):
                     user = User.get(old_keys[0].user)
                     user.set_password(password)
                     user.save()
+                    old_keys.update(active=False)
                     return render(request, "taskproductivity/login.html", {
                         "type": "success",
                         "message": "You've successfully changed your password. Please login now."
