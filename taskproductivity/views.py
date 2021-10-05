@@ -154,28 +154,29 @@ def recovery(request):
             # Template ID from mailjet. 
             template_id = 3221171
 
-            # Create recovery request if no past requests exists
-            if recovery_data.count() == 0:
-                Recoveries.objects.create(user=user[0], key=hash)
-                result = send_email(email_data, template_id)
-                print(result.status_code)
-                print(result.json())
-            else:
+            if recovery_data.count() > 0:
                 old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
                 # Only create new entry if past request is more than 5 minutes old to prevent spanning.
                 timediff = timezone.now() - old_keys[0].time
                 if timediff > timedelta(minutes=5):
                     old_keys.update(active=False)
-                    Recoveries.objects.create(user=user[0], key=hash)
-                    result = send_email(email_data, template_id)
-                    print(result.status_code)
-                    print(result.json())
                 else:
                     return render(request, "taskproductivity/recovery.html", {
                         "type": "warning",
                         "message": "Please try to rest your password again after 5 minutes"
                     }, status=400)
+               
+            Recoveries.objects.create(user=user[0], key=hash)
+            result = send_email(email_data, template_id)
+            print(result.status_code)
+            print(result.json())
 
+        # The system will show this message regardless if the email exists or not so that hackers will not know if the email is in our system or not. 
+        return render(request, "taskproductivity/recovery.html", {
+                    "type": "success",
+                    "message": "Please check your email for the recovery email"
+                }, status=200)
+                
     return render(request, "taskproductivity/recovery.html")
 
 @ensure_csrf_cookie
@@ -199,23 +200,26 @@ def reset_password(request, key=None):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         old_keys = Recoveries.objects.filter(key=recovery_key, active=True).order_by('-time')
-        timediff = timezone.now() - old_keys[0].time
-        if old_keys.count() > 0 or timediff <= timedelta(hours=1):
-            if password == confirmation:
-                user = User.get(old_keys[0].user)
-                user.set_password(password)
-                user.save()
-                return render(request, "taskproductivity/login.html", {
-                    "type": "success",
-                    "message": "You've successfully changed your password. Please login now."
-                }, status=200)
-            
-            # If passwords doesn't match
-            return render(request, "taskproductivity/reset.html", {
-                "key": key,
-                "type": "warning",
-                "message": "Passwords don't match. Please make sure they are the same and try again."
-            }, status=401)
+
+        # If there is a key and the creation time and the current time is not more than 1 hour
+        if old_keys.count() > 0:
+            timediff = timezone.now() - old_keys[0].time
+            if  timediff <= timedelta(hours=1):
+                if password == confirmation:
+                    user = User.get(old_keys[0].user)
+                    user.set_password(password)
+                    user.save()
+                    return render(request, "taskproductivity/login.html", {
+                        "type": "success",
+                        "message": "You've successfully changed your password. Please login now."
+                    }, status=200)
+                
+                # If passwords doesn't match
+                return render(request, "taskproductivity/reset.html", {
+                    "key": key,
+                    "type": "warning",
+                    "message": "Passwords don't match. Please make sure they are the same and try again."
+                }, status=401)
 
         # Invalid key or expired key
         return render(request, "taskproductivity/recovery.html", {

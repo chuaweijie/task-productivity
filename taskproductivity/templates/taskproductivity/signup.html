@@ -6,8 +6,8 @@
         <main class="form-signin">
             <form action="{% url 'signup' %}" method="post">
                 {% csrf_token %}
-                <img class="mb-4" src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="72" height="57">
-                <h1 class="h3 mb-3 fw-normal">Sign up for better productivity</h1>
+                <img class="mb-4" src="{% static 'taskproductivity/img/90-days.svg' %}" alt="" width="72" height="57">
+                <h1 class="h3 mb-3 fw-normal">Sign up to track your 90 days reporting!</h1>
                 <div class="form-floating">
                     <input type="text" class="form-control" id="username" name="username" placeholder="username">
                     <label for="username">Username</label>
@@ -36,7 +36,7 @@
                         Invalid password. Please ensure your passwords are the same.
                     </div>
                 </div>
-                <button class="w-100 btn btn-lg btn-success" id="signup" disabled="true" type="submit">Sign up</button>
+                <button class="w-100 btn btn-lg btn-primary" id="signup" disabled="true" type="submit">Sign up</button>
             </form>
         </main>
     </div>

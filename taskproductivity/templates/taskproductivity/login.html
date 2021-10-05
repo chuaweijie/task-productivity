@@ -6,7 +6,7 @@
         <main class="form-signin">
             <form action="{% url 'login' %}" method="post">
                 {% csrf_token %}
-                <img class="mb-4" src="{% static 'taskproductivity/img/taskproductivity.svg' %}" alt="" width="72" height="57">
+                <img class="mb-4" src="{% static 'taskproductivity/img/90-days.svg' %}" alt="" width="72" height="57">
                 <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
     
                 <div class="form-floating">
@@ -18,9 +18,10 @@
                     <label for="floatingPassword">Password</label>
                 </div>
     
-                <button class="w-100 btn btn-lg btn-success" id="btn_signin" type="submit">Sign in</button>
+                <button class="w-100 btn btn-lg btn-primary" id="btn_signin" type="submit">Sign in</button>
             </form>
         </main>
+        <a href="{% url 'recovery' %}">Forgot password?</a>
     </div>
 {% endblock %}
 
