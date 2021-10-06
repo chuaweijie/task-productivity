@@ -19,6 +19,8 @@ class ViewTestCase(ViewBaseCase):
         data = {'email': self.email,}
         self.user = User.objects.get(email=self.email)
         self.recovery_key = "12345678"
+        earlier_time = timezone.now() - timedelta(minutes=15)
+        Recoveries.objects.create(user=self.user, key=self.recovery_key, time=earlier_time)
         # Manually create the key to skip repeated email request. Email request will be tested in test_recovery_page_with_correct_email and test_recovery_page_with_wrong_email
 
     def test_recovery_page(self):
@@ -38,7 +40,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_fake_key(self):
         """Trying to reach the change password page with a fake key"""
-        Recoveries.objects.create(user=self.user, key=self.recovery_key)
+        # Recoveries.objects.create(user=self.user, key=self.recovery_key)
         response = self.client.get("/reset_password/12345678971234")
         self.assertEqual(response.status_code, 401)
         
@@ -49,7 +51,7 @@ class ViewTestCase(ViewBaseCase):
     
     def test_correct_key_change_password(self):
         """Try to reach change password page with correct key and change password"""
-        Recoveries.objects.create(user=self.user, key=self.recovery_key)
+        # Recoveries.objects.create(user=self.user, key=self.recovery_key)
         response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
         old_password = self.user.password
@@ -77,13 +79,13 @@ class ViewTestCase(ViewBaseCase):
     
     def test_recovery_page_with_correct_email(self):
         """Check the recovery page when a correct email is provided"""
-        recoveries_count_before = Recoveries.objects.filter(user=self.user, active=True).count()
+        recoveries_count_before = Recoveries.objects.filter(user=self.user).count()
         data = {'email': self.email}
         response = self._csrf_post("/recovery", data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context[0].get("message"), "We've sent an email to " + self.email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
         self.assertEqual(response.context[0].get("type"), "success")
-        recoveries_count_after = Recoveries.objects.filter(user=self.user, active=True).count()
+        recoveries_count_after = Recoveries.objects.filter(user=self.user).count()
         self.assertNotEqual(recoveries_count_before, recoveries_count_after)
 
 
