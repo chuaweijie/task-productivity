@@ -215,7 +215,7 @@ def reset_password(request, key=None):
                 
                 # If passwords doesn't match
                 return render(request, "taskproductivity/reset.html", {
-                    "key": key,
+                    "key": recovery_key,
                     "type": "warning",
                     "message": "Passwords don't match. Please make sure they are the same and try again."
                 }, status=401)

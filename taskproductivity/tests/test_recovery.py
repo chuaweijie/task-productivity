@@ -52,9 +52,10 @@ class ViewTestCase(ViewBaseCase):
     #Add a test when different passwords are entered. Write this later.
     #
     def test_correct_key_incorrect_password(self):
-        """Try to reach change password page with correct key and correct password"""
+        """Try to reach change password page with correct key and incorrect password"""
         response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context[0].get("key"), self.recovery_key)
         old_password = self.user.password
         data = {
             'password': '4321',
@@ -66,6 +67,7 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.context[0].get("message"), "Passwords don't match. Please make sure they are the same and try again.")
         self.assertEqual(response.context[0].get("type"), "warning")
+        self.assertEqual(response.context[0].get("key"), self.recovery_key)
 
         recovery = Recoveries.objects.filter(key=self.recovery_key)
         self.assertTrue(recovery[0].active)
@@ -76,6 +78,7 @@ class ViewTestCase(ViewBaseCase):
         """Try to reach change password page with correct key and correct password"""
         response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context[0].get("key"), self.recovery_key)
         old_password = self.user.password
         data = {
             'password': '4321',
@@ -115,9 +118,22 @@ class UITestCase(UIBaseCase):
     def setUp(self):
         super().setUp()
 
+    # Tests to write
+    # 1. Test requesting recovery with an existing email
+    # 2. Test requesting recovery with an invalid email
+    # 3. Test reseting password without any key
+    # 4. Test reseting password with incorrect key
+    # 5. Test reseting password with expired key
+    # 6. Test reseting password with correct key but with incorrect confirmation password and then with the correct confirmation password
+    # 7. Test reseting password with correct key and with correct confirmation password
+
     # Write the test for both browsers here.
-    def test_invalid_username_login(self):
-        '''Testing the login when that doesn't exists.'''
+    def test_recovery_page(self):
+        '''Test the elements in the recovery page. The page where users go and get their password reset.'''
+        self._login("user", "12345678")
+    
+    def test_reset_page(self):
+        '''Test the elements in the reset page. The page where users go and reset their password once they have the link'''
         self._login("user", "12345678")
         
 
