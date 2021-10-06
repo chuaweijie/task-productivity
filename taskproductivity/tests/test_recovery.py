@@ -40,7 +40,6 @@ class ViewTestCase(ViewBaseCase):
     
     def test_fake_key(self):
         """Trying to reach the change password page with a fake key"""
-        # Recoveries.objects.create(user=self.user, key=self.recovery_key)
         response = self.client.get("/reset_password/12345678971234")
         self.assertEqual(response.status_code, 401)
         
@@ -49,9 +48,32 @@ class ViewTestCase(ViewBaseCase):
         # Check for the correct error styling
         self.assertEqual(response.context[0].get("type"), "danger")
     
-    def test_correct_key_change_password(self):
-        """Try to reach change password page with correct key and change password"""
-        # Recoveries.objects.create(user=self.user, key=self.recovery_key)
+    #
+    #Add a test when different passwords are entered. Write this later.
+    #
+    def test_correct_key_incorrect_password(self):
+        """Try to reach change password page with correct key and correct password"""
+        response = self.client.get("/reset_password/"+self.recovery_key)
+        self.assertEqual(response.status_code, 200)
+        old_password = self.user.password
+        data = {
+            'password': '4321',
+            'confirmation': '1234',
+            'key': self.recovery_key
+        }
+        response = self._csrf_post("/reset_password", data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.context[0].get("message"), "Passwords don't match. Please make sure they are the same and try again.")
+        self.assertEqual(response.context[0].get("type"), "warning")
+
+        recovery = Recoveries.objects.filter(key=self.recovery_key)
+        self.assertTrue(recovery[0].active)
+        new_password = User.objects.get(email=self.email).password
+        self.assertEqual(old_password, new_password)
+
+    def test_correct_key_correct_password(self):
+        """Try to reach change password page with correct key and correct password"""
         response = self.client.get("/reset_password/"+self.recovery_key)
         self.assertEqual(response.status_code, 200)
         old_password = self.user.password
