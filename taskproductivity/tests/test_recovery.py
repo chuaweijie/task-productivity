@@ -58,7 +58,7 @@ class ViewTestCase(ViewBaseCase):
         old_password = self.user.password
         data = {
             'password': '4321',
-            'confirmation': '1234',
+            'confirmation': '4321',
             'key': self.recovery_key
         }
         response = self._csrf_post("/reset_password", data)
