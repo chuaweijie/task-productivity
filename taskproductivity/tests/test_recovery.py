@@ -16,7 +16,6 @@ class ViewTestCase(ViewBaseCase):
         self._setup_default_user()
         
         # Setup the recovery with the correct flow to test the recovery flow. To change the email, please go to base_case.py
-        data = {'email': self.email,}
         self.user = User.objects.get(email=self.email)
         self.recovery_key = "12345678"
         earlier_time = timezone.now() - timedelta(minutes=15)
@@ -34,7 +33,7 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.status_code, 401)
         
         # Check for the correct error message. 
-        self.assertEqual(response.context[0].get("message"), "Invalid recovery key")
+        self.assertEqual(response.context[0].get("message"), "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
         # Check for the correct error styling
         self.assertEqual(response.context[0].get("type"), "danger")
     
@@ -44,13 +43,22 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.status_code, 401)
         
         # Check for the correct error message. 
-        self.assertEqual(response.context[0].get("message"), "Invalid recovery key")
+        self.assertEqual(response.context[0].get("message"), "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
         # Check for the correct error styling
         self.assertEqual(response.context[0].get("type"), "danger")
     
-    #
-    #Add a test when different passwords are entered. Write this later.
-    #
+    def test_expired_key(self):
+        """Testing the condition when the key used is old."""
+        recovery = Recoveries.objects.filter(key=self.recovery_key)
+        earlier_time = timezone.now() - timedelta(hours=2)
+        recovery.update(time=earlier_time)
+        response = self.client.get("/reset_password/"+self.recovery_key)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.context[0].get("message"), "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
+        self.assertEqual(response.context[0].get("type"), "danger")
+        recovery = Recoveries.objects.filter(key=self.recovery_key, active=True)
+        self.assertEqual(recovery.count(), 0)
+    
     def test_correct_key_incorrect_password(self):
         """Try to reach change password page with correct key and incorrect password"""
         response = self.client.get("/reset_password/"+self.recovery_key)
@@ -113,11 +121,12 @@ class ViewTestCase(ViewBaseCase):
         recoveries_count_after = Recoveries.objects.filter(user=self.user).count()
         self.assertNotEqual(recoveries_count_before, recoveries_count_after)
 
-
 class UITestCase(UIBaseCase):
     def setUp(self):
         super().setUp()
-
+        self.username = "test_user"
+        self.email = "test_user@test.com"
+        self.password = "12345678"
     # Tests to write
     # 1. Test requesting recovery with an existing email
     # 2. Test requesting recovery with an invalid email
@@ -129,13 +138,21 @@ class UITestCase(UIBaseCase):
 
     # Write the test for both browsers here.
     def test_recovery_page(self):
-        '''Test the elements in the recovery page. The page where users go and get their password reset.'''
-        self._login("user", "12345678")
+        '''Check if all the needed elements in the recovery page exists or not.'''
+        self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
+        input_email = self.web_driver.find_element_by_name("input_email")
+        self.assertEqual(len(input_email), 1)
+        self.assertEqual(input_email[0].get_attribute("placeholder"), "Email")
+        btn_submit = self.web_driver.find_element_by_name("btn_submit")
+        self.assertEqual(len(btn_submit), 1)
+        self.assertEqual(btn_submit[0].text, "Submit")
     
-    def test_reset_page(self):
-        '''Test the elements in the reset page. The page where users go and reset their password once they have the link'''
-        self._login("user", "12345678")
-        
+    def test_reset_page_without_key(self):
+        '''Check if the browser will redirect and display the correct error message if someone access the rest_pasword page without key'''
+        self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password'))
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
+        self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
 
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
      def setUp(self):
@@ -144,7 +161,7 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.web_driver = webdriver.Chrome(options=options)
-        self._signup_user("test_user", "test_user@test.com", "12345678", "12345678")
+        self._signup_user(self.username, self.email, self.password, self.password)
         # For the rest of the test methods, please refer to UITestCase
 
 class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
@@ -154,6 +171,6 @@ class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
         options = webdriver.FirefoxOptions()
         options.headless = True
         self.web_driver = webdriver.Firefox(options=options)
-        self._signup_user("test_user", "test_user@test.com", "12345678", "12345678")
+        self._signup_user(self.username, self.email, self.password, self.password)
 
         # For the rest of the test methods, please refer to UITestCase

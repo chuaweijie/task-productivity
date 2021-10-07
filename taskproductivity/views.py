@@ -183,14 +183,18 @@ def reset_password(request, key=None):
         if key is not None:
             keys = Recoveries.objects.filter(key=key, active=True).order_by('-time')
             if keys.count() > 0:
-                return render(request, "taskproductivity/reset.html", {
-                    "key": key
-                })
+                timediff = timezone.now() - keys[0].time
+                if  timediff <= timedelta(hours=1):
+                    return render(request, "taskproductivity/reset.html", {
+                        "key": key
+                    })
+                # If key is older than 1 hour, set it's active to false
+                keys.update(active=False)
 
         # When no key or an incorrect key is provided.
         return render(request, "taskproductivity/index.html", {
                 "type": "danger",
-                "message": "Invalid recovery key"
+                "message": "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
             }, status=401)
 
     elif request.method == "POST":
@@ -222,6 +226,6 @@ def reset_password(request, key=None):
 
         # Invalid key or expired key
         return render(request, "taskproductivity/recovery.html", {
-            "type": "Error",
+            "type": "danger",
             "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
         }, status=400)
