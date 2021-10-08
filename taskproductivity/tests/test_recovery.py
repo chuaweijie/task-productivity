@@ -128,9 +128,9 @@ class UITestCase(UIBaseCase):
         self.email = "test_user@test.com"
         self.password = "12345678"
     # Tests to write
-    # 1. Test requesting recovery with an existing email
-    # 2. Test requesting recovery with an invalid email
-    # 3. Test reseting password without any key
+    # 1. Test requesting recovery with an existing email [Done]
+    # 2. Test requesting recovery with an invalid email [Done]
+    # 3. Test reseting password without any key [Done]
     # 4. Test reseting password with incorrect key
     # 5. Test reseting password with expired key
     # 6. Test reseting password with correct key but with incorrect confirmation password and then with the correct confirmation password
@@ -140,19 +140,42 @@ class UITestCase(UIBaseCase):
     def test_recovery_page(self):
         '''Check if all the needed elements in the recovery page exists or not.'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
-        input_email = self.web_driver.find_element_by_name("input_email")
+        input_email = self.web_driver.find_elements_by_name("input_email")
         self.assertEqual(len(input_email), 1)
         self.assertEqual(input_email[0].get_attribute("placeholder"), "Email")
-        btn_submit = self.web_driver.find_element_by_name("btn_submit")
+        btn_submit = self.web_driver.find_elements_by_name("btn_submit")
         self.assertEqual(len(btn_submit), 1)
         self.assertEqual(btn_submit[0].text, "Submit")
     
+    def test_recovery_page_wrong_email(self):
+        '''Check if the browser shows the correct message when an incorrect email is provided.'''
+        email = "wrong@wrong.com"
+        self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
+        self.web_driver.find_element_by_id("input_email").send_keys(email)
+        self.web_driver.find_element_by_id("btn_submit").click()
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-success")
+        self.assertEqual(alert.text, "We've sent an email to " + email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
+
+    def test_recovery_page_correct_email(self):
+        '''Check if the browser shows the correct message when a correct email is provided.'''
+        self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
+        self.web_driver.find_element_by_id("input_email").send_keys(self.email)
+        self.web_driver.find_element_by_id("btn_submit").click()
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-success")
+        self.assertEqual(alert.text, "We've sent an email to " + self.email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
+
     def test_reset_page_without_key(self):
         '''Check if the browser will redirect and display the correct error message if someone access the rest_pasword page without key'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password'))
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
         self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
+
+    def test_rest_page_incorrect_key(self):
+        # Continue writing this during lunch time.
+        self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/incorrect'))
 
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
      def setUp(self):
