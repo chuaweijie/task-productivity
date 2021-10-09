@@ -127,14 +127,6 @@ class UITestCase(UIBaseCase):
         self.username = "test_user"
         self.email = "test_user@test.com"
         self.password = "12345678"
-    # Tests to write
-    # 1. Test requesting recovery with an existing email [Done]
-    # 2. Test requesting recovery with an invalid email [Done]
-    # 3. Test reseting password without any key [Done]
-    # 4. Test reseting password with incorrect key
-    # 5. Test reseting password with expired key
-    # 6. Test reseting password with correct key but with incorrect confirmation password and then with the correct confirmation password
-    # 7. Test reseting password with correct key and with correct confirmation password
 
     # Write the test for both browsers here.
     def test_recovery_page(self):
@@ -173,9 +165,63 @@ class UITestCase(UIBaseCase):
         self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
         self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
 
-    def test_rest_page_incorrect_key(self):
-        # Continue writing this during lunch time.
+    def test_reset_page_incorrect_key(self):
+        '''Check if the browser will display the correct message when an incorrect key is provided.'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/incorrect'))
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
+        self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
+
+    def test_reset_page_expired_key(self):
+        '''Check if the browser will display the correct message when an expired key is provided.'''
+        earlier_time = timezone.now() - timedelta(hours=2)
+        Recoveries.objects.create(user=self.username, key="12345678", time=earlier_time)
+        self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
+        self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
+    
+    def test_rest_page_correct_key_wrong_pass(self):
+        '''Check if the browser will display the correct message when incorrect password format or confirmation is provided.'''
+        Recoveries.objects.create(user=self.username, key="12345678")
+        self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
+        
+        new_password = self.web_driver.find_element_by_id("password").send_keys("1234")
+        self.assertEqual(new_password.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_password_feedback")
+        self.assertEqual(div_feedback.text, "Invalid password.\nPasswords must be at least 8 characters long.")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        self.assertFalse(btn_submit.enabled)
+        
+        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("1234")
+        self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
+        self.assertEqual(div_feedback.text, "Invalid password.\nPasswords must be at least 8 characters long.")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        self.assertFalse(btn_submit.enabled)
+
+        new_password = self.web_driver.find_element_by_id("password").send_keys("1234567890")
+        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("0987654321")
+        self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-invalid")
+        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
+        self.assertEqual(div_feedback.text, "Invalid password. Please ensure your passwords are the same.")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        self.assertFalse(btn_submit.enabled)
+    
+    def test_rest_page_correct_key_correct_pass(self):
+        '''Check if the browser behavior is correct when the correct key and passwords are provided'''
+        Recoveries.objects.create(user=self.username, key="12345678")
+        self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
+        new_password = self.web_driver.find_element_by_id("password").send_keys("1234567890")
+        self.assertEqual(new_password.get_attribute("class"), "form-control is-valid")
+        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("1234567890")
+        self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-valid")
+        self.web_driver.find_element_by_id("btn_submit").click()
+
+        self.assertEqual(self.web_driver.current_url, '%s%s' % (self.live_server_url, '/login'))
+        alert = self.web_driver.find_element_by_id("alert")
+        self.assertEqual(alert.get_attribute("class"), "alert alert-success")
+        self.assertEqual(alert.text, "You've successfully changed your password. Please login now.")
 
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
      def setUp(self):
