@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block body %}
-    <div class="text-center login">
-        <main class="form-signin">
+    <div class="text-center form-div">
+        <main class="form-main">
             <form action="{% url 'signup' %}" method="post">
                 {% csrf_token %}
                 <img class="mb-4" src="{% static 'taskproductivity/img/90-days.svg' %}" alt="" width="72" height="57">
@@ -43,6 +43,7 @@
 {% endblock %}
 
 {% block script %}
+    <link href="{% static 'taskproductivity/css/form.css' %}" rel="stylesheet">
     <link href="{% static 'taskproductivity/css/signup.css' %}" rel="stylesheet">
     <script type="module" src="{% static 'taskproductivity/js/signup.js' %}"></script>
 {% endblock %}

@@ -2,8 +2,25 @@
 {% load static %}
 
 {% block body %}
-    <h1>Recovery</h1>
+    <div class="text-center form-div">
+        <main class="form-main">
+            <form action="{% url 'recovery' %}" method="post">
+                {% csrf_token %}
+                <img class="mb-4" src="{% static 'taskproductivity/img/90-days.svg' %}" alt="" width="72" height="57">
+                <h3 class="mb-3 fw-normal">Reset Password</h3>
+                <p class="fw-light text-start">Please enter your email address below and we will send you an email with instructions on how to reset your password.</p>
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+                    <label for="floatingInput">Email</label>
+                </div>
+                <button class="w-100 btn btn-lg btn-primary" id="btn_submit" type="submit" disabled="true">Submit</button>
+            </form>
+        </main>
+    </div>
 {% endblock %}
 
 {% block script %}
+    <link href="{% static 'taskproductivity/css/form.css' %}" rel="stylesheet">
+    <link href="{% static 'taskproductivity/css/recovery.css' %}" rel="stylesheet">
+    <script type="module" src="{% static 'taskproductivity/js/recovery.js' %}"></script>
 {% endblock %}

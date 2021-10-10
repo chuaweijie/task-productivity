@@ -159,7 +159,7 @@ class UITestCase(UIBaseCase):
         self.assertEqual(alert.text, "We've sent an email to " + self.email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder.")
 
     def test_reset_page_without_key(self):
-        '''Check if the browser will redirect and display the correct error message if someone access the rest_pasword page without key'''
+        '''Check if the browser will redirect and display the correct error message if someone access the reset_pasword page without key'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password'))
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
@@ -181,7 +181,7 @@ class UITestCase(UIBaseCase):
         self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
         self.assertEqual(alert.text, "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again")
     
-    def test_rest_page_correct_key_wrong_pass(self):
+    def test_reset_page_correct_key_wrong_pass(self):
         '''Check if the browser will display the correct message when incorrect password format or confirmation is provided.'''
         Recoveries.objects.create(user=self.username, key="12345678")
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
@@ -208,7 +208,7 @@ class UITestCase(UIBaseCase):
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         self.assertFalse(btn_submit.enabled)
     
-    def test_rest_page_correct_key_correct_pass(self):
+    def test_reset_page_correct_key_correct_pass(self):
         '''Check if the browser behavior is correct when the correct key and passwords are provided'''
         Recoveries.objects.create(user=self.username, key="12345678")
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
