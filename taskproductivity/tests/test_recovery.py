@@ -66,8 +66,8 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.context[0].get("key"), self.recovery_key)
         old_password = self.user.password
         data = {
-            'password': '4321',
-            'confirmation': '1234',
+            'password': '87654321',
+            'confirmation': '12348765',
             'key': self.recovery_key
         }
         response = self._csrf_post("/reset_password", data)
@@ -89,8 +89,8 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.context[0].get("key"), self.recovery_key)
         old_password = self.user.password
         data = {
-            'password': '4321',
-            'confirmation': '4321',
+            'password': '87654321',
+            'confirmation': '87654321',
             'key': self.recovery_key
         }
         self._csrf_post("/reset_password", data)
@@ -132,7 +132,7 @@ class UITestCase(UIBaseCase):
     def test_recovery_page(self):
         '''Check if all the needed elements in the recovery page exists or not.'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
-        input_email = self.web_driver.find_elements_by_name("input_email")
+        input_email = self.web_driver.find_elements_by_name("email")
         self.assertEqual(len(input_email), 1)
         self.assertEqual(input_email[0].get_attribute("placeholder"), "Email")
         btn_submit = self.web_driver.find_elements_by_name("btn_submit")
@@ -143,7 +143,7 @@ class UITestCase(UIBaseCase):
         '''Check if the browser shows the correct message when an incorrect email is provided.'''
         email = "wrong@wrong.com"
         self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
-        self.web_driver.find_element_by_id("input_email").send_keys(email)
+        self.web_driver.find_element_by_id("email").send_keys(email)
         self.web_driver.find_element_by_id("btn_submit").click()
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-success")
@@ -152,7 +152,7 @@ class UITestCase(UIBaseCase):
     def test_recovery_page_correct_email(self):
         '''Check if the browser shows the correct message when a correct email is provided.'''
         self.web_driver.get('%s%s' % (self.live_server_url, '/recovery'))
-        self.web_driver.find_element_by_id("input_email").send_keys(self.email)
+        self.web_driver.find_element_by_id("email").send_keys(self.email)
         self.web_driver.find_element_by_id("btn_submit").click()
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-success")
@@ -175,7 +175,7 @@ class UITestCase(UIBaseCase):
     def test_reset_page_expired_key(self):
         '''Check if the browser will display the correct message when an expired key is provided.'''
         earlier_time = timezone.now() - timedelta(hours=2)
-        Recoveries.objects.create(user=self.username, key="12345678", time=earlier_time)
+        Recoveries.objects.create(user=self.user, key="12345678", time=earlier_time)
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-danger")
@@ -183,42 +183,38 @@ class UITestCase(UIBaseCase):
     
     def test_reset_page_correct_key_wrong_pass(self):
         '''Check if the browser will display the correct message when incorrect password format or confirmation is provided.'''
-        Recoveries.objects.create(user=self.username, key="12345678")
+        Recoveries.objects.create(user=self.user, key="12345678")
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
         
-        new_password = self.web_driver.find_element_by_id("password").send_keys("1234")
+        new_password = self.web_driver.find_element_by_id("password")
+        new_password.send_keys("1234")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        self.assertFalse(btn_submit.is_enabled())
+        new_confirmation = self.web_driver.find_element_by_id("confirmation")
+        new_confirmation.send_keys("1234")
         self.assertEqual(new_password.get_attribute("class"), "form-control is-invalid")
-        div_feedback = self.web_driver.find_element_by_id("div_password_feedback")
-        self.assertEqual(div_feedback.text, "Invalid password.\nPasswords must be at least 8 characters long.")
-        btn_submit = self.web_driver.find_element_by_id("btn_submit")
-        self.assertFalse(btn_submit.enabled)
-        
-        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("1234")
         self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-invalid")
-        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
-        self.assertEqual(div_feedback.text, "Invalid password.\nPasswords must be at least 8 characters long.")
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
-        self.assertFalse(btn_submit.enabled)
+        self.assertFalse(btn_submit.is_enabled())
 
         new_password = self.web_driver.find_element_by_id("password").send_keys("1234567890")
-        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("0987654321")
+        new_confirmation = self.web_driver.find_element_by_id("confirmation")
+        new_confirmation.send_keys("0987654321")
         self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-invalid")
-        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
-        self.assertEqual(div_feedback.text, "Invalid password. Please ensure your passwords are the same.")
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
-        self.assertFalse(btn_submit.enabled)
+        self.assertFalse(btn_submit.is_enabled())
     
     def test_reset_page_correct_key_correct_pass(self):
         '''Check if the browser behavior is correct when the correct key and passwords are provided'''
-        Recoveries.objects.create(user=self.username, key="12345678")
+        Recoveries.objects.create(user=self.user, key="12345678")
         self.web_driver.get('%s%s' % (self.live_server_url, '/reset_password/12345678'))
-        new_password = self.web_driver.find_element_by_id("password").send_keys("1234567890")
+        new_password = self.web_driver.find_element_by_id("password")
+        new_password.send_keys("1234567890")
+        new_confirmation = self.web_driver.find_element_by_id("confirmation")
+        new_confirmation.send_keys("1234567890")
         self.assertEqual(new_password.get_attribute("class"), "form-control is-valid")
-        new_confirmation = self.web_driver.find_element_by_id("confirmation").send_keys("1234567890")
         self.assertEqual(new_confirmation.get_attribute("class"), "form-control is-valid")
         self.web_driver.find_element_by_id("btn_submit").click()
-
-        self.assertEqual(self.web_driver.current_url, '%s%s' % (self.live_server_url, '/login'))
         alert = self.web_driver.find_element_by_id("alert")
         self.assertEqual(alert.get_attribute("class"), "alert alert-success")
         self.assertEqual(alert.text, "You've successfully changed your password. Please login now.")
@@ -231,6 +227,7 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         options.headless = True
         self.web_driver = webdriver.Chrome(options=options)
         self._signup_user(self.username, self.email, self.password, self.password)
+        self.user = User.objects.get(email=self.email)
         # For the rest of the test methods, please refer to UITestCase
 
 class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
@@ -241,5 +238,5 @@ class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
         options.headless = True
         self.web_driver = webdriver.Firefox(options=options)
         self._signup_user(self.username, self.email, self.password, self.password)
-
+        self.user = User.objects.get(email=self.email)
         # For the rest of the test methods, please refer to UITestCase

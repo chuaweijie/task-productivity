@@ -134,7 +134,7 @@ def recovery(request):
         email = request.POST["email"]
         user = User.objects.filter(email__exact=email)
         if user.count() > 0:
-            recovery_data = user[0].recovery
+            recovery_data = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
             # Hash the user's email and the current time
             key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
             hash = hashlib.sha224(key.encode('utf-8')).hexdigest()

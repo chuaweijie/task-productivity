@@ -43,11 +43,12 @@ export function passwordCheck(pass_id, confirmation_id, min_pass_len, btn_id, to
 }
 
 export function confirmationCheck(pass_id, confirmation_id, btn_id, total_elements) {
-    const password = document.querySelector(pass_id).value;
+    const password_ele = document.querySelector(pass_id);
+    const password = password_ele.value;
     const confirmation_ele = document.querySelector(confirmation_id);
     const confirmation = confirmation_ele.value;
 
-    if (password == confirmation) {
+    if (password == confirmation && password_ele.classList == "form-control is-valid") {
         confirmation_ele.classList.remove("is-invalid");
         confirmation_ele.classList.add("is-valid");
     }
