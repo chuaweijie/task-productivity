@@ -2,11 +2,29 @@
 {% load static %}
 
 {% block body %}
-    <h1>Reset</h1>
-    {% if key %}
-        <h2>{{ key }}</h2>
-    {% endif %}
+    <div class="text-center form-div">
+        <main class="form-main">
+            <form action="{% url 'reset_password' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="key" name="key" value="{{ key }}">
+                <img class="mb-4" src="{% static 'taskproductivity/img/90-days.svg' %}" alt="" width="72" height="57">
+                <h3 class="mb-3 fw-normal">Change Password</h3>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                    <label for="floatingInput">New Password</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="confirmation" name="confirmation" placeholder="Confirm New Password">
+                    <label for="floatingInput">Confirm New Password</label>
+                </div>
+                <button class="w-100 btn btn-lg btn-primary" id="btn_submit" type="submit" disabled="true">Submit</button>
+            </form>
+        </main>
+    </div>
 {% endblock %}
 
 {% block script %}
+    <link href="{% static 'taskproductivity/css/form.css' %}" rel="stylesheet">
+    <link href="{% static 'taskproductivity/css/reset.css' %}" rel="stylesheet">
+    <script type="module" src="{% static 'taskproductivity/js/reset.js' %}"></script>
 {% endblock %}

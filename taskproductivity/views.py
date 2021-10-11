@@ -207,7 +207,7 @@ def reset_password(request, key=None):
         if old_keys.count() > 0:
             timediff = timezone.now() - old_keys[0].time
             if  timediff <= timedelta(hours=1):
-                if password == confirmation:
+                if password == confirmation and len(password) > 7:
                     user = User.objects.get(username=old_keys[0].user)
                     user.set_password(password)
                     user.save()
