@@ -1,4 +1,4 @@
-import json
+import time
 from django.test import TestCase, Client
 
 # The classes here are created to setup all of the required methods for all webpage test cases. 
@@ -21,9 +21,10 @@ class ViewBaseCase(TestCase):
         return response
 
     def _setup_default_user(self):
+        self.email = "test@test.com"
         data = {
             'username': 'test', 
-            'email': 'test@test.com', 
+            'email': self.email, 
             'password':'1234', 
             'confirmation':'1234'
         }
@@ -40,6 +41,7 @@ class UIBaseCase(object):
         self.web_driver.find_element_by_name('email').send_keys(email)
         self.web_driver.find_element_by_name('password').send_keys(password)
         self.web_driver.find_element_by_name('confirmation').send_keys(confirmation)
+        time.sleep(0.1)
         if click:
             self.web_driver.find_element_by_id("signup").click()
     

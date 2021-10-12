@@ -1,0 +1,42 @@
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+}
+
+.form-div {
+    padding-top: 40px;
+}
+
+.form-main {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+
+.form-main .checkbox {
+    font-weight: 400;
+}
+
+.form-main .form-floating:focus-within {
+    z-index: 2;
+}

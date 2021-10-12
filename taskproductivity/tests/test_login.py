@@ -61,16 +61,15 @@ class UITestCase(UIBaseCase):
 
     # Write the test for both browsers here.
     def test_invalid_username_login(self):
-        '''Testing the login when that doesn't exists.'''
+        '''Testing the login with a user that doesn't exists.'''
         self._login("user", "12345678")
         
-    
     def test_invalid_password_login(self):
-        '''Testing the login when that doesn't exists.'''
+        '''Testing the login with a wrong password'''
         self._login("test_user", "87654321")
     
-    def test_alid_login(self):
-        '''Testing the login when that doesn't exists.'''
+    def test_valid_login(self):
+        '''Testing the login with correct credential'''
         self._login("test_user", "12345678")
 
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):

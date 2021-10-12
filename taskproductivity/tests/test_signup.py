@@ -122,7 +122,7 @@ class UITestCase(UIBaseCase):
         input_email = self.web_driver.find_element_by_id("email")
         self.assertEqual(input_email.get_attribute("class"), "form-control is-invalid")
         div_feedback = self.web_driver.find_element_by_id("div_email_feedback")
-        self.assertEqual(div_feedback.text, "Invalid email address format.")
+        self.assertEqual(div_feedback.text, "Invalid email address format / email exists.")
 
     def test_registration(self):
         '''Testing the registration of a user'''

@@ -1,4 +1,4 @@
-import json
+import json, hashlib
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -8,8 +8,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.utils import timezone
 
-from taskproductivity.models import User
+from .utils import send_email
+
+from datetime import timedelta
+
+from taskproductivity.models import User, Recoveries
 
 # Create your views here.
 @ensure_csrf_cookie
@@ -71,6 +76,7 @@ def signup(request):
     else:
         return render(request, "taskproductivity/signup.html")
 
+# route for the frontend js to check if email exists or not. 
 def email(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -87,7 +93,7 @@ def email(request):
     else:
         raise PermissionDenied
         
-
+# route for the frontend js to check if username exists or not. 
 def username(request):
     if request.method == "POST":            
         data = json.loads(request.body)
@@ -121,3 +127,105 @@ def man_task(request):
 
 def report(request):
     return render(request, "taskproductivity/report.html")
+
+@ensure_csrf_cookie
+def recovery(request):
+    if request.method == "POST":
+        email = request.POST["email"]
+        user = User.objects.filter(email__exact=email)
+        if user.count() > 0:
+            recovery_data = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
+            # Hash the user's email and the current time
+            key = ""+email+timezone.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
+            hash = hashlib.sha224(key.encode('utf-8')).hexdigest()
+            
+            # Custom emaild data according to email template of mailjet.
+            email_data = {
+                "sender": "noreply@weijie.info",
+                "sender_name": "90 Days Reporting Tracker",
+                "to": email,
+                "to_name": user[0].first_name + " " + user[0].last_name,
+                "subject": "90 Days Reporting Tracker - Forgot your password?",
+                "password_reset_button": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>Create a new password</a>",
+                "password_reset_link": "<a href='https://task-productivity.herokuapp.com/reset_password/" + hash + "'>https://task-productivity.herokuapp.com/reset_password/" + hash + "</a>"
+            }
+
+            # Template ID from mailjet. 
+            template_id = 3221171
+            if recovery_data.count() > 0:
+                old_keys = Recoveries.objects.filter(user=user[0], active=True).order_by('-time')
+                # Only create new entry if past request is more than 5 minutes old to prevent spanning.
+                timediff = timezone.now() - old_keys[0].time
+                if timediff > timedelta(minutes=5):
+                    old_keys.update(active=False)
+                else:
+                    return render(request, "taskproductivity/recovery.html", {
+                        "type": "success",
+                        "message": "We've sent an email to " + email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder."
+                    }, status=200)
+               
+            Recoveries.objects.create(user=user[0], key=hash)
+            result = send_email(email_data, template_id)
+            print(result.status_code)
+            print(result.json())
+
+        # The system will show this message regardless if the email exists or not so that hackers will not know if the email is in our system or not. 
+        return render(request, "taskproductivity/recovery.html", {
+            "type": "success",
+            "message": "We've sent an email to " + email +" with instructions to reset your password. If you do not receive a password reset message after 1 minute, verify that you entered the correct email address, or check your spam folder."
+        }, status=200)
+                
+    return render(request, "taskproductivity/recovery.html")
+
+@ensure_csrf_cookie
+def reset_password(request, key=None):    
+    if request.method == "GET":
+        if key is not None:
+            keys = Recoveries.objects.filter(key=key, active=True).order_by('-time')
+            if keys.count() > 0:
+                timediff = timezone.now() - keys[0].time
+                if  timediff <= timedelta(hours=1):
+                    return render(request, "taskproductivity/reset.html", {
+                        "key": key
+                    })
+                # If key is older than 1 hour, set it's active to false
+                keys.update(active=False)
+
+        # When no key or an incorrect key is provided.
+        return render(request, "taskproductivity/index.html", {
+                "type": "danger",
+                "message": "Invalid recovery key. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
+            }, status=401)
+
+    elif request.method == "POST":
+        recovery_key = request.POST["key"]
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+        old_keys = Recoveries.objects.filter(key=recovery_key, active=True).order_by('-time')
+
+        # If there is a key and the creation time and the current time is not more than 1 hour
+        if old_keys.count() > 0:
+            timediff = timezone.now() - old_keys[0].time
+            if  timediff <= timedelta(hours=1):
+                if password == confirmation and len(password) > 7:
+                    user = User.objects.get(username=old_keys[0].user)
+                    user.set_password(password)
+                    user.save()
+                    old_keys.update(active=False)
+                    return render(request, "taskproductivity/login.html", {
+                        "type": "success",
+                        "message": "You've successfully changed your password. Please login now."
+                    }, status=200)
+                
+                # If passwords doesn't match
+                return render(request, "taskproductivity/reset.html", {
+                    "key": recovery_key,
+                    "type": "warning",
+                    "message": "Passwords don't match. Please make sure they are the same and try again."
+                }, status=401)
+
+        # Invalid key or expired key
+        return render(request, "taskproductivity/recovery.html", {
+            "type": "danger",
+            "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
+        }, status=400)
