@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
         DATABASE_URL: "postgres://postgres:postgres@localhost:5432/task_productivity"
+        MAILJET_KEY: ${{ secrets.MAILJET_KEY }}
+        MAILJET_SECRET: ${{ secrets.MAILJET_SECRET }}
     services:
       postgres:
         image: postgres
