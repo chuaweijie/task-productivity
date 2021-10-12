@@ -4,3 +4,4 @@ dj_database_url
 selenium
 whitenoise
 gunicorn
+mailjet_rest
