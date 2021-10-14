@@ -1,5 +1,3 @@
-import time
-
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .base_case import ViewBaseCase, UIBaseCase
 
@@ -137,7 +135,6 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.web_driver = webdriver.Chrome(options=options)
-        self.web_driver.implicitly_wait(1)
         self._signup_user("test", "test@test.com", "12345678", "12345678")
         # For the rest of the test methods, please refer to UITestCase
 

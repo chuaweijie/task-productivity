@@ -12,6 +12,8 @@ class ERDates(models.Model):
     renewal = models.DateField(null=True)
     active = models.BooleanField(default=True)
     departure = models.DateField(null=True)
+    online_start = models.DateField(null=True)
+    online_end = models.DateField(null=True)
     reported_date = models.DateField(null=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField(auto_now=True)
