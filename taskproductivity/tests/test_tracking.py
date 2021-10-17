@@ -32,14 +32,154 @@ class ViewTestCase(ViewBaseCase):
         response = self._csrf_post("/tracking" ,data)
         online_start = datetime.fromisoformat('2021-05-04') - timedelta(days=14)
         online_end = datetime.fromisoformat('2021-05-04') - timedelta(days=7)
-        self.assertEqual(response.json(), { "id": 1,
-                                            "entry": None, 
-                                            "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
-                                            "online_start": online_start.timestamp(),
-                                            "online_end": online_end.timestamp()})
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 1,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
+                                            })
         
         # Test marking as reported
+        data = {
+            "mode": "reported", 
+            "id": 1,
+            "reported_date": datetime.fromisoformat('2021-06-04').timestamp()
+        }
+        response = self._csrf_put("/tracking" ,data)
+        self.assertEqual(response.json(), {"status": "successful",
+                                            "data": None
+                                            })
 
+        response = self.client.get("/history")
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": [{   "id": 1,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp(),
+                                                        "depature": None,
+                                                        "reported_date": datetime.fromisoformat('2021-06-04').timestamp()}]
+                                            })
+        # Test delete
+        data = {
+            "mode": "renewal", 
+            "renewal": datetime.fromisoformat('2021-06-04').timestamp()
+        }
+        response = self._csrf_post("/tracking" ,data)
+        online_start = datetime.fromisoformat('2021-06-04') - timedelta(days=14)
+        online_end = datetime.fromisoformat('2021-06-04') - timedelta(days=7)
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 2,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-06-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
+                                            })
+        data = {
+            "id": 2
+        }
+        response = self._csrf_delete("/tracking", data)
+        self.assertEqual(response.json(), {"status": "successful",
+                                            "data": None
+                                            })
+        
+        # Test the case of adding a new tracking where the renewal date is known
+        data = {
+            "mode": "renewal", 
+            "renewal": datetime.fromisoformat('2021-07-04').timestamp()
+        }
+        response = self._csrf_post("/tracking" ,data)
+        online_start = datetime.fromisoformat('2021-07-04') - timedelta(days=14)
+        online_end = datetime.fromisoformat('2021-07-04') - timedelta(days=7)
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 3,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
+                                            })
+
+        # Test marking as departed
+        data = {
+            "mode": "departure", 
+            "id": 3,
+            "date": datetime.fromisoformat('2021-07-15').timestamp(),
+        }
+        response = self._csrf_put("/tracking" ,data)
+        self.assertEqual(response.json(), {"status": "successful",
+                                            "data": None
+                                            })
+
+        response = self.client.get("/history")
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": [{   "id": 1,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
+                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
+                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
+                                                        "depature": None,
+                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                    {   "id": 3,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp(),
+                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()}]
+                                            })
+
+        # Test the case of adding a new entry with the arrival date
+        data = {
+            "mode": "entry", 
+            "entry": datetime.fromisoformat('2021-08-04').timestamp()
+        }
+        response = self._csrf_post("/tracking" ,data)
+        renewal = datetime.fromisoformat('2021-08-04') + timedelta(days=90)
+        online_start = renewal - timedelta(days=14)
+        online_end = renewal - timedelta(days=7)
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 4,
+                                                        "entry": datetime.fromisoformat('2021-08-04').timestamp(), 
+                                                        "renewal": renewal.timestamp(),
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
+                                            })
+        
+        data = {
+            "mode": "reported", 
+            "id": 4,
+            "reported_date": datetime.fromisoformat('2021-08-31').timestamp()
+        }
+        response = self._csrf_put("/tracking" ,data)
+        self.assertEqual(response.json(), {"status": "successful",
+                                            "data": None
+                                            })
+        
+        response = self.client.get("/history")
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": [{   "id": 1,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
+                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
+                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
+                                                        "depature": None,
+                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                    {   "id": 3,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp(),
+                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()},
+                                                    {   "id": 4,
+                                                        "entry": datetime.fromisoformat('2021-08-04').timestamp(), 
+                                                        "renewal": renewal.timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp(),
+                                                        "depature": None,
+                                                        "reported_date": datetime.fromisoformat('2021-08-31').timestamp()}]
+                                            })
 
 
 

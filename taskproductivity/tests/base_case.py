@@ -31,7 +31,18 @@ class ViewBaseCase(TestCase):
             response = self.client.put(url, data, content_type="application/json", HTTP_X_CSRFTOKEN=csfrtoken)
         else:
             data['csrfmiddlewaretoken'] = csfrtoken
-            response = self.client.post(url, data)
+            response = self.client.put(url, data)
+        return response
+    
+    def _csrf_delete(self, url, data, json=False):
+        csfrtoken = self._get_csrf(url)
+
+        # If the put is JSON based.
+        if json:
+            response = self.client.delete(url, data, content_type="application/json", HTTP_X_CSRFTOKEN=csfrtoken)
+        else:
+            data['csrfmiddlewaretoken'] = csfrtoken
+            response = self.client.delete(url, data)
         return response
 
     def _setup_default_user(self):
