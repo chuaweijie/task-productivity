@@ -12,9 +12,9 @@ from django.utils import timezone
 
 from .utils import send_email
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-from taskproductivity.models import User, Recoveries
+from taskproductivity.models import ERDates, User, Recoveries
 
 # Create your views here.
 @ensure_csrf_cookie
@@ -229,3 +229,36 @@ def reset_password(request, key=None):
             "type": "danger",
             "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
         }, status=400)
+
+
+@ensure_csrf_cookie
+def tracking(request):
+    data = json.loads(request.body)
+    if request.method == "GET":
+        active_tracking = ERDates.objects.get(user=request.user.id, active=True)
+        return JsonResponse({"status": "successful",
+                            "id": active_tracking.user,
+                            "entry": active_tracking.entry, 
+                            "renewal": active_tracking.renewal,
+                            "online_start": active_tracking.online_start,
+                            "online_end": active_tracking.online_end
+                            }, status=200)
+    elif request.method == "PUT":
+        mode = data.get("mode")
+        if mode == "renewal":
+            renewal = datetime.fromtimestamp(int(data.get("renewal"))/1000.0)
+            online_start = renewal - timedelta(days=15)
+            online_end = renewal - timedelta(days=7)
+            erdate = ERDates.objects.create(renewal=renewal, online_start=online_start, online_end=online_end)
+            return JsonResponse({   "status": "successful",
+                                    "data": {   "id": erdate.id,
+                                                "entry": erdate.entry, 
+                                                "renewal": erdate.renewal, 
+                                                "online_start": erdate.online_start,
+                                                "online_end": erdate.online_end}
+                                }, status=200)
+
+
+@ensure_csrf_cookie
+def history(request):
+    return JsonResponse({"error": "Page number out of range"}, status=400)

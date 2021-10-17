@@ -145,7 +145,7 @@ class ViewTestCase(ViewBaseCase):
                                                         "online_start": online_start.timestamp(),
                                                         "online_end": online_end.timestamp()}
                                             })
-        
+        # Testing of history after marking the most recent entry with reported. 
         data = {
             "mode": "reported", 
             "id": 4,
@@ -181,7 +181,38 @@ class ViewTestCase(ViewBaseCase):
                                                         "reported_date": datetime.fromisoformat('2021-08-31').timestamp()}]
                                             })
 
-
+        # Testing undo
+        data = {
+                "mode": "undo", 
+                "id": 4
+        }
+        response = self._csrf_put("/history" ,data)
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": [{   "id": 1,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
+                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
+                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
+                                                        "depature": None,
+                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                    {   "id": 3,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp(),
+                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()}]
+                                            })
+        # Testing list history after undo
+        response = self.client.get("/tracking")
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 4,
+                                                        "entry": datetime.fromisoformat('2021-08-04').timestamp(), 
+                                                        "renewal": renewal.timestamp(),
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
+                                            })
+        
 
 # In order to speed up the completion of the project, I am going to omit all the tests.
 class UITestCase(UIBaseCase):

@@ -14,4 +14,6 @@ urlpatterns = [
     path("recovery", views.recovery, name="recovery"),
     path("reset_password", views.reset_password, name="reset_password"),
     path("reset_password/<str:key>", views.reset_password, name="reset_password"),
+    path("tracking", views.tracking, name="tracking"),
+    path("history", views.history, name="history"),
 ]
