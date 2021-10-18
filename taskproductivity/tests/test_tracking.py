@@ -61,7 +61,7 @@ class ViewTestCase(ViewBaseCase):
                                                         "depature": None,
                                                         "reported_date": datetime.fromisoformat('2021-06-04').timestamp()}]
                                             })
-        # Test delete
+        
         data = {
             "mode": "renewal", 
             "renewal": datetime.fromisoformat('2021-06-04').timestamp()
@@ -76,6 +76,7 @@ class ViewTestCase(ViewBaseCase):
                                                         "online_start": online_start.timestamp(),
                                                         "online_end": online_end.timestamp()}
                                             })
+        # Test delete
         data = {
             "id": 2
         }

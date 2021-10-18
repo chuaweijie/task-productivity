@@ -157,7 +157,14 @@ def recovery(request):
                 # Only create new entry if past request is more than 5 minutes old to prevent spanning.
                 timediff = timezone.now() - old_keys[0].time
                 if timediff > timedelta(minutes=5):
-                    old_keys.update(active=False)
+                    try:
+                        old_keys.update(active=False)
+                    except IntegrityError as e:
+                        print(e)
+                        return render(request, "taskproductivity/recovery.html", {
+                            "type": "danger",
+                            "message": "An error has occured. Please contact the administrator with this message: " + e
+                    }, status=200)
                 else:
                     return render(request, "taskproductivity/recovery.html", {
                         "type": "success",
@@ -189,7 +196,10 @@ def reset_password(request, key=None):
                         "key": key
                     })
                 # If key is older than 1 hour, set it's active to false
-                keys.update(active=False)
+                try:
+                    keys.update(active=False)
+                except IntegrityError as e:
+                    print(e)
 
         # When no key or an incorrect key is provided.
         return render(request, "taskproductivity/index.html", {
@@ -211,7 +221,15 @@ def reset_password(request, key=None):
                     user = User.objects.get(username=old_keys[0].user)
                     user.set_password(password)
                     user.save()
-                    old_keys.update(active=False)
+                    try:
+                        old_keys.update(active=False)
+                    except IntegrityError as e:
+                        print(e)
+                        return render(request, "taskproductivity/reset.html", {
+                            "type": "danger",
+                            "message": "An error has occured. Please contact the administrator with this message: " + e
+                        }, status=200)
+                    # Return to login page upon update success
                     return render(request, "taskproductivity/login.html", {
                         "type": "success",
                         "message": "You've successfully changed your password. Please login now."
@@ -243,13 +261,63 @@ def tracking(request):
                             "online_start": active_tracking.online_start,
                             "online_end": active_tracking.online_end
                             }, status=200)
-    elif request.method == "PUT":
+    elif request.method == "POST":
         mode = data.get("mode")
         if mode == "renewal":
             renewal = datetime.fromtimestamp(int(data.get("renewal"))/1000.0)
             online_start = renewal - timedelta(days=15)
             online_end = renewal - timedelta(days=7)
-            erdate = ERDates.objects.create(renewal=renewal, online_start=online_start, online_end=online_end)
+            try:
+                erdate = ERDates.objects.create(renewal=renewal, online_start=online_start, online_end=online_end)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e},status=400)
+            return JsonResponse({   "status": "successful",
+                                    "data": {   "id": erdate.id,
+                                                "entry": erdate.entry, 
+                                                "renewal": erdate.renewal, 
+                                                "online_start": erdate.online_start,
+                                                "online_end": erdate.online_end}
+                                }, status=200)
+        elif mode == "entry":
+            entry = datetime.fromtimestamp(int(data.get("entry"))/1000.0)
+            renewal = entry + timedelta(days=90)
+            online_start = renewal - timedelta(days=15)
+            online_end = renewal - timedelta(days=7)
+            try:
+                erdate = ERDates.objects.create(entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+            return JsonResponse({   "status": "successful",
+                                    "data": {   "id": erdate.id,
+                                                "entry": erdate.entry, 
+                                                "renewal": erdate.renewal, 
+                                                "online_start": erdate.online_start,
+                                                "online_end": erdate.online_end}
+                                }, status=200)
+
+    elif request.method == "PUT":
+        mode = data.get("mode")
+        if mode == "departure":
+            departure_date = datetime.fromtimestamp(int(data.get("date"))/1000.0)
+            ERDate_id = int(data.get("id"))
+            try:
+                erdate = ERDates.objects.get(id=ERDate_id).update(depature=departure_date)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+
+            return JsonResponse({   "status": "successful",
+                                    "data": None
+                                }, status=200)
+        # CONTINUE CODING FROM HERE
+        elif mode == "reported":
+            entry = datetime.fromtimestamp(int(data.get("entry"))/1000.0)
+            renewal = entry + timedelta(days=90)
+            online_start = renewal - timedelta(days=15)
+            online_end = renewal - timedelta(days=7)
+            erdate = ERDates.objects.create(entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
             return JsonResponse({   "status": "successful",
                                     "data": {   "id": erdate.id,
                                                 "entry": erdate.entry, 
