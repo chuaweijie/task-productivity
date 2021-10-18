@@ -268,7 +268,7 @@ def tracking(request):
             online_start = renewal - timedelta(days=15)
             online_end = renewal - timedelta(days=7)
             try:
-                erdate = ERDates.objects.create(renewal=renewal, online_start=online_start, online_end=online_end)
+                erdate = ERDates.objects.create(user=request.user.id, renewal=renewal, online_start=online_start, online_end=online_end)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e},status=400)
@@ -285,7 +285,7 @@ def tracking(request):
             online_start = renewal - timedelta(days=15)
             online_end = renewal - timedelta(days=7)
             try:
-                erdate = ERDates.objects.create(entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
+                erdate = ERDates.objects.create(user=request.user.id, entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -303,7 +303,7 @@ def tracking(request):
             departure_date = datetime.fromtimestamp(int(data.get("date"))/1000.0)
             ERDate_id = int(data.get("id"))
             try:
-                erdate = ERDates.objects.get(id=ERDate_id).update(depature=departure_date)
+                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(depature=departure_date)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -311,20 +311,30 @@ def tracking(request):
             return JsonResponse({   "status": "successful",
                                     "data": None
                                 }, status=200)
-        # CONTINUE CODING FROM HERE
         elif mode == "reported":
-            entry = datetime.fromtimestamp(int(data.get("entry"))/1000.0)
-            renewal = entry + timedelta(days=90)
-            online_start = renewal - timedelta(days=15)
-            online_end = renewal - timedelta(days=7)
-            erdate = ERDates.objects.create(entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
+            reported_date = datetime.fromtimestamp(int(data.get("reported_date"))/1000.0)
+            ERDate_id = int(data.get("id"))
+            try:
+                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(reported_date=reported_date)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+            # If update is successful
             return JsonResponse({   "status": "successful",
-                                    "data": {   "id": erdate.id,
-                                                "entry": erdate.entry, 
-                                                "renewal": erdate.renewal, 
-                                                "online_start": erdate.online_start,
-                                                "online_end": erdate.online_end}
+                                    "data": None
                                 }, status=200)
+    elif request.method == "DELETE":
+        ERDate_id = data.get("id")
+        try:
+            erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).delete()
+        except IntegrityError as e:
+            print(e)
+            return JsonResponse({"error":e}, status=400)
+        
+        # If delete is successful
+        return JsonResponse({   "status": "successful",
+                                "data": None
+                            }, status=200)
 
 
 @ensure_csrf_cookie
