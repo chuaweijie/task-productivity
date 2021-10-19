@@ -9,6 +9,7 @@ from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.utils import timezone
+from mailjet_rest.client import DoesNotExistError
 
 from .utils import send_email
 
@@ -251,9 +252,14 @@ def reset_password(request, key=None):
 
 @ensure_csrf_cookie
 def tracking(request):
-    data = json.loads(request.body)
+    body = request.body
     if request.method == "GET":
-        active_tracking = ERDates.objects.get(user=request.user.id, active=True)
+        try:
+            active_tracking = ERDates.objects.get(user=request.user.id, active=True)
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "no data",
+                            "data": None
+                            }, status=200)    
         return JsonResponse({"status": "successful",
                             "id": active_tracking.user,
                             "entry": active_tracking.entry, 
@@ -262,6 +268,7 @@ def tracking(request):
                             "online_end": active_tracking.online_end
                             }, status=200)
     elif request.method == "POST":
+        data = json.loads(body)
         mode = data.get("mode")
         if mode == "renewal":
             renewal = datetime.fromtimestamp(int(data.get("renewal"))/1000.0)
@@ -298,12 +305,13 @@ def tracking(request):
                                 }, status=200)
 
     elif request.method == "PUT":
+        data = json.loads(body)
         mode = data.get("mode")
         if mode == "departure":
             departure_date = datetime.fromtimestamp(int(data.get("date"))/1000.0)
             ERDate_id = int(data.get("id"))
             try:
-                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(depature=departure_date)
+                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(depature=departure_date, active=False)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -315,7 +323,7 @@ def tracking(request):
             reported_date = datetime.fromtimestamp(int(data.get("reported_date"))/1000.0)
             ERDate_id = int(data.get("id"))
             try:
-                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(reported_date=reported_date)
+                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(reported_date=reported_date, active=False)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -324,6 +332,7 @@ def tracking(request):
                                     "data": None
                                 }, status=200)
     elif request.method == "DELETE":
+        data = json.loads(body)
         ERDate_id = data.get("id")
         try:
             erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).delete()
@@ -339,4 +348,20 @@ def tracking(request):
 
 @ensure_csrf_cookie
 def history(request):
-    return JsonResponse({"error": "Page number out of range"}, status=400)
+    if request.body != "b''":
+        data = json.loads(request.body)
+    if request.method == "GET":
+        tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
+        data = [entry.serialize() for entry in tracking_history]
+        return JsonResponse({"status": "successful",
+                            "data": data
+                            }, status=200)
+    
+    elif request.method == "PUT":
+        if data.get("mode") == "undo":
+            ERDates.objects.get(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
+            tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
+            data = [entry.serialize() for entry in tracking_history]
+            return JsonResponse({"status": "successful",
+                                "data": data
+                                }, status=200)

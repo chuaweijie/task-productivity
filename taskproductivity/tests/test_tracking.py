@@ -21,7 +21,7 @@ class ViewTestCase(ViewBaseCase):
         }
         self._csrf_post("/login", data)
         response = self.client.get("/tracking")
-        self.assertEqual(response.json(), {"data": None})
+        self.assertEqual(response.json(), {"status": "no data", "data": None})
         self.assertEqual(response.status_code, 200)
 
         # Test the case of adding a new tracking where the renewal date is known

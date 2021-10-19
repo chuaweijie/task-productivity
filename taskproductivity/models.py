@@ -18,6 +18,16 @@ class ERDates(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField(auto_now=True)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "entry": self.entry,
+            "renewal": self.renewal,
+            "online_start": self.online_start,
+            "online_end": self.online_end,
+            "departure": self.departure,
+            "reported_date": self.reported_date
+        }
 # Table unused. Will be utilized for future implementation
 class Recoveries(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery")
