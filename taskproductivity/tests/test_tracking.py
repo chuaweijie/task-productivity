@@ -29,7 +29,7 @@ class ViewTestCase(ViewBaseCase):
             "mode": "renewal", 
             "renewal": datetime.fromisoformat('2021-05-04').timestamp()
         }
-        response = self._csrf_post("/tracking" ,data)
+        response = self._csrf_post("/tracking" ,data, True)
         online_start = datetime.fromisoformat('2021-05-04') - timedelta(days=14)
         online_end = datetime.fromisoformat('2021-05-04') - timedelta(days=7)
         self.assertEqual(response.json(), { "status": "successful",
@@ -46,7 +46,7 @@ class ViewTestCase(ViewBaseCase):
             "id": 1,
             "reported_date": datetime.fromisoformat('2021-06-04').timestamp()
         }
-        response = self._csrf_put("/tracking" ,data)
+        response = self._csrf_put("/tracking" ,data, True)
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
@@ -66,7 +66,7 @@ class ViewTestCase(ViewBaseCase):
             "mode": "renewal", 
             "renewal": datetime.fromisoformat('2021-06-04').timestamp()
         }
-        response = self._csrf_post("/tracking" ,data)
+        response = self._csrf_post("/tracking" ,data, True)
         online_start = datetime.fromisoformat('2021-06-04') - timedelta(days=14)
         online_end = datetime.fromisoformat('2021-06-04') - timedelta(days=7)
         self.assertEqual(response.json(), { "status": "successful",
@@ -80,7 +80,7 @@ class ViewTestCase(ViewBaseCase):
         data = {
             "id": 2
         }
-        response = self._csrf_delete("/tracking", data)
+        response = self._csrf_delete("/tracking", data, True)
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
@@ -90,7 +90,7 @@ class ViewTestCase(ViewBaseCase):
             "mode": "renewal", 
             "renewal": datetime.fromisoformat('2021-07-04').timestamp()
         }
-        response = self._csrf_post("/tracking" ,data)
+        response = self._csrf_post("/tracking" ,data, True)
         online_start = datetime.fromisoformat('2021-07-04') - timedelta(days=14)
         online_end = datetime.fromisoformat('2021-07-04') - timedelta(days=7)
         self.assertEqual(response.json(), { "status": "successful",

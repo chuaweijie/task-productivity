@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from mailjet_rest.client import DoesNotExistError
 
-from .utils import send_email
+from .utils import send_email, convert_to_timestamp
 
 from datetime import timedelta, datetime
 
@@ -252,60 +252,78 @@ def reset_password(request, key=None):
 
 @ensure_csrf_cookie
 def tracking(request):
-    body = request.body
+    if request.content_type == "application/json":
+        data = json.loads(request.body)
     if request.method == "GET":
         try:
             active_tracking = ERDates.objects.get(user=request.user.id, active=True)
         except ObjectDoesNotExist:
             return JsonResponse({"status": "no data",
                             "data": None
-                            }, status=200)    
+                            }, status=200)
+        print(f"entry {active_tracking.entry}")
+        print(f"renewal {active_tracking.renewal}")
+        print(f"online_start {active_tracking.online_start}")
+        print(f"online_end {active_tracking.online_end}")
+        print(f"entry {type(active_tracking.entry)}")
+        print(f"renewal {type(active_tracking.renewal)}")
+        print(f"online_start {type(active_tracking.online_start)}")
+        print(f"online_end {type(active_tracking.online_end)}")
+        entry, renewal, online_start, online_end = convert_to_timestamp(active_tracking.entry, active_tracking.renewal, active_tracking.online_start, active_tracking.online_end)
         return JsonResponse({"status": "successful",
                             "id": active_tracking.user,
-                            "entry": active_tracking.entry, 
-                            "renewal": active_tracking.renewal,
-                            "online_start": active_tracking.online_start,
-                            "online_end": active_tracking.online_end
+                            "entry": entry, 
+                            "renewal": renewal,
+                            "online_start": online_start,
+                            "online_end": online_end
                             }, status=200)
     elif request.method == "POST":
-        data = json.loads(body)
         mode = data.get("mode")
         if mode == "renewal":
-            renewal = datetime.fromtimestamp(int(data.get("renewal"))/1000.0)
-            online_start = renewal - timedelta(days=15)
+            renewal = datetime.fromtimestamp(int(data.get("renewal")))
+            online_start = renewal - timedelta(days=14)
             online_end = renewal - timedelta(days=7)
             try:
-                erdate = ERDates.objects.create(user=request.user.id, renewal=renewal, online_start=online_start, online_end=online_end)
+                erdate = ERDates.objects.create(user=request.user, renewal=renewal, online_start=online_start, online_end=online_end)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e},status=400)
+            entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
+            print(f"renewal_entry {erdate.entry}")
+            print(f"renewal_renewal {erdate.renewal}")
+            print(f"renewal_online_start {erdate.online_start}")
+            print(f"renewal_online_end {erdate.online_end}")
+            print(f"renewal_entry {type(erdate.entry)}")
+            print(f"renewal_renewal {type(erdate.renewal)}")
+            print(f"renewal_online_start {type(erdate.online_start)}")
+            print(f"renewal_online_end {type(erdate.online_end)}")
             return JsonResponse({   "status": "successful",
                                     "data": {   "id": erdate.id,
-                                                "entry": erdate.entry, 
-                                                "renewal": erdate.renewal, 
-                                                "online_start": erdate.online_start,
-                                                "online_end": erdate.online_end}
+                                                "entry": entry, 
+                                                "renewal": renewal, 
+                                                "online_start": online_start,
+                                                "online_end": online_end}
                                 }, status=200)
         elif mode == "entry":
             entry = datetime.fromtimestamp(int(data.get("entry"))/1000.0)
             renewal = entry + timedelta(days=90)
-            online_start = renewal - timedelta(days=15)
+            online_start = renewal - timedelta(days=14)
             online_end = renewal - timedelta(days=7)
             try:
                 erdate = ERDates.objects.create(user=request.user.id, entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
+            entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
             return JsonResponse({   "status": "successful",
                                     "data": {   "id": erdate.id,
-                                                "entry": erdate.entry, 
-                                                "renewal": erdate.renewal, 
-                                                "online_start": erdate.online_start,
-                                                "online_end": erdate.online_end}
+                                                "entry": entry, 
+                                                "renewal": renewal, 
+                                                "online_start": online_start,
+                                                "online_end": online_end}
                                 }, status=200)
 
     elif request.method == "PUT":
-        data = json.loads(body)
         mode = data.get("mode")
         if mode == "departure":
             departure_date = datetime.fromtimestamp(int(data.get("date"))/1000.0)
@@ -332,7 +350,6 @@ def tracking(request):
                                     "data": None
                                 }, status=200)
     elif request.method == "DELETE":
-        data = json.loads(body)
         ERDate_id = data.get("id")
         try:
             erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).delete()
