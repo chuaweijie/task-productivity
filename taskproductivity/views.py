@@ -263,11 +263,11 @@ def tracking(request):
                             }, status=200)
         entry, renewal, online_start, online_end = convert_to_timestamp(active_tracking.entry, active_tracking.renewal, active_tracking.online_start, active_tracking.online_end)
         return JsonResponse({"status": "successful",
-                            "id": active_tracking.id,
-                            "entry": entry, 
-                            "renewal": renewal,
-                            "online_start": online_start,
-                            "online_end": online_end
+                            "data":{"id": active_tracking.id,
+                                    "entry": entry, 
+                                    "renewal": renewal,
+                                    "online_start": online_start,
+                                    "online_end": online_end}
                             }, status=200)
     elif request.method == "POST":
         mode = data.get("mode")
@@ -294,7 +294,7 @@ def tracking(request):
             online_start = renewal - timedelta(days=14)
             online_end = renewal - timedelta(days=7)
             try:
-                erdate = ERDates.objects.create(user=request.user.id, entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
+                erdate = ERDates.objects.create(user=request.user, entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -313,7 +313,7 @@ def tracking(request):
             departure_date = datetime.fromtimestamp(int(data.get("date")))
             ERDate_id = int(data.get("id"))
             try:
-                erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).update(depature=departure_date, active=False)
+                erdate = ERDates.objects.filter(id=ERDate_id, active=True, user=request.user.id).update(departure=departure_date, active=False)
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
@@ -360,7 +360,7 @@ def history(request):
     
     elif request.method == "PUT":
         if data.get("mode") == "undo":
-            ERDates.objects.get(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
+            ERDates.objects.filter(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
             tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
             data = [entry.serialize() for entry in tracking_history]
             return JsonResponse({"status": "successful",

@@ -117,17 +117,17 @@ class ViewTestCase(ViewBaseCase):
                                             "data": [{   "id": 1,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
-                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
-                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
-                                                        "depature": None,
-                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                        "online_start": (datetime.fromisoformat('2021-05-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-05-04') - timedelta(days=7)).timestamp(),
+                                                        "departure": None,
+                                                        "reported_date": datetime.fromisoformat('2021-06-04').timestamp()},
                                                     {   "id": 3,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
                                                         "online_start": online_start.timestamp(),
                                                         "online_end": online_end.timestamp(),
-                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
-                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()}]
+                                                        "departure": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": None}]
                                             })
 
         # Test the case of adding a new entry with the arrival date
@@ -135,7 +135,7 @@ class ViewTestCase(ViewBaseCase):
             "mode": "entry", 
             "entry": datetime.fromisoformat('2021-08-04').timestamp()
         }
-        response = self._csrf_post("/tracking" ,data)
+        response = self._csrf_post("/tracking" ,data, True)
         renewal = datetime.fromisoformat('2021-08-04') + timedelta(days=90)
         online_start = renewal - timedelta(days=14)
         online_end = renewal - timedelta(days=7)
@@ -152,7 +152,7 @@ class ViewTestCase(ViewBaseCase):
             "id": 4,
             "reported_date": datetime.fromisoformat('2021-08-31').timestamp()
         }
-        response = self._csrf_put("/tracking" ,data)
+        response = self._csrf_put("/tracking" ,data, True)
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
@@ -162,23 +162,23 @@ class ViewTestCase(ViewBaseCase):
                                             "data": [{   "id": 1,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
-                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
-                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
-                                                        "depature": None,
-                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                        "online_start": (datetime.fromisoformat('2021-05-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-05-04') - timedelta(days=7)).timestamp(),
+                                                        "departure": None,
+                                                        "reported_date": datetime.fromisoformat('2021-06-04').timestamp()},
                                                     {   "id": 3,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
-                                                        "online_start": online_start.timestamp(),
-                                                        "online_end": online_end.timestamp(),
-                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
-                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()},
+                                                        "online_start": (datetime.fromisoformat('2021-07-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-07-04') - timedelta(days=7)).timestamp(),
+                                                        "departure": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": None},
                                                     {   "id": 4,
                                                         "entry": datetime.fromisoformat('2021-08-04').timestamp(), 
                                                         "renewal": renewal.timestamp(), 
                                                         "online_start": online_start.timestamp(),
                                                         "online_end": online_end.timestamp(),
-                                                        "depature": None,
+                                                        "departure": None,
                                                         "reported_date": datetime.fromisoformat('2021-08-31').timestamp()}]
                                             })
 
@@ -187,22 +187,22 @@ class ViewTestCase(ViewBaseCase):
                 "mode": "undo", 
                 "id": 4
         }
-        response = self._csrf_put("/history" ,data)
+        response = self._csrf_put("/history" ,data, True)
         self.assertEqual(response.json(), { "status": "successful",
                                             "data": [{   "id": 1,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
-                                                        "online_start": datetime.fromisoformat('2021-05-04') - timedelta(days=14),
-                                                        "online_end": datetime.fromisoformat('2021-05-04') - timedelta(days=7),
-                                                        "depature": None,
-                                                        "reported_date": datetime.fromisoformat('2021-05-04').timestamp()},
+                                                        "online_start": (datetime.fromisoformat('2021-05-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-05-04') - timedelta(days=7)).timestamp(),
+                                                        "departure": None,
+                                                        "reported_date": datetime.fromisoformat('2021-06-04').timestamp()},
                                                     {   "id": 3,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-07-04').timestamp(), 
-                                                        "online_start": online_start.timestamp(),
-                                                        "online_end": online_end.timestamp(),
-                                                        "depature": datetime.fromisoformat('2021-07-15').timestamp(),
-                                                        "reported_date": datetime.fromisoformat('2021-07-04').timestamp()}]
+                                                        "online_start": (datetime.fromisoformat('2021-07-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-07-04') - timedelta(days=7)).timestamp(),
+                                                        "departure": datetime.fromisoformat('2021-07-15').timestamp(),
+                                                        "reported_date": None}]
                                             })
         # Testing list history after undo
         response = self.client.get("/tracking")
