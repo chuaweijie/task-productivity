@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 
+from .utils import convert_to_timestamp
+
 class User(AbstractUser):
     email = models.CharField(max_length=256, unique=True)
     verified_account = models.BooleanField(default=False)
@@ -19,14 +21,15 @@ class ERDates(models.Model):
     edit_date = models.DateTimeField(auto_now=True)
 
     def serialize(self):
+        entry, renewal, online_start, online_end, departure, reported_date = convert_to_timestamp(self.entry, self.renewal, self.online_start, self.online_end, self.departure, self.reported_date)
         return {
             "id": self.id,
-            "entry": self.entry,
-            "renewal": self.renewal,
-            "online_start": self.online_start,
-            "online_end": self.online_end,
-            "departure": self.departure,
-            "reported_date": self.reported_date
+            "entry": entry,
+            "renewal": renewal,
+            "online_start": online_start,
+            "online_end": online_end,
+            "departure": departure,
+            "reported_date": reported_date
         }
 # Table unused. Will be utilized for future implementation
 class Recoveries(models.Model):

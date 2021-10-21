@@ -58,7 +58,7 @@ class ViewTestCase(ViewBaseCase):
                                                         "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
                                                         "online_start": online_start.timestamp(),
                                                         "online_end": online_end.timestamp(),
-                                                        "depature": None,
+                                                        "departure": None,
                                                         "reported_date": datetime.fromisoformat('2021-06-04').timestamp()}]
                                             })
         
@@ -107,7 +107,7 @@ class ViewTestCase(ViewBaseCase):
             "id": 3,
             "date": datetime.fromisoformat('2021-07-15').timestamp(),
         }
-        response = self._csrf_put("/tracking" ,data)
+        response = self._csrf_put("/tracking" ,data, True)
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
