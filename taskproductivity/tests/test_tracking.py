@@ -214,6 +214,17 @@ class ViewTestCase(ViewBaseCase):
                                                         "online_end": online_end.timestamp()}
                                             })
         
+        # Write code to test undo when there is an active tracking
+        data = {
+                "mode": "undo", 
+                "id": 3
+        }
+        response = self._csrf_put("/history" ,data, True)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), { "status": "Error",
+                                            "msg": "Active tracking data"
+                                            })
+        
 
 # In order to speed up the completion of the project, I am going to omit all the tests.
 class UITestCase(UIBaseCase):

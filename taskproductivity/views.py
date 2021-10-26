@@ -371,5 +371,5 @@ def history(request):
                                     }, status=200)
             
             return JsonResponse({"status": "Error",
-                                    "data": {"msg":"Active tracking data"}
-                                    }, status=400)
+                                "msg":"Active tracking data"
+                                }, status=400)
