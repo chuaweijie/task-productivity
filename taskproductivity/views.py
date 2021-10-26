@@ -360,9 +360,16 @@ def history(request):
     
     elif request.method == "PUT":
         if data.get("mode") == "undo":
-            ERDates.objects.filter(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
-            tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
-            data = [entry.serialize() for entry in tracking_history]
-            return JsonResponse({"status": "successful",
-                                "data": data
-                                }, status=200)
+            try:
+                ERDates.objects.get(user=request.user.id, active=True)
+            except ObjectDoesNotExist:
+                ERDates.objects.filter(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
+                tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
+                data = [entry.serialize() for entry in tracking_history]
+                return JsonResponse({"status": "successful",
+                                    "data": data
+                                    }, status=200)
+            
+            return JsonResponse({"status": "Error",
+                                    "data": {"msg":"Active tracking data"}
+                                    }, status=400)
