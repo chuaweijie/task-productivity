@@ -230,15 +230,47 @@ class ViewTestCase(ViewBaseCase):
 class UITestCase(UIBaseCase):
     def setUp(self):
         super().setUp()
+        self.username = "test_user"
+        self.email = "test_user@test.com"
+        self.password = "12345678"
 
     # Write the test for both browsers here. 
-    def test_incorrect_password_registration(self):
-        '''Testing the registration when passwords are incorrect.'''
+    def test_full_tracking_flow(self):
+        '''This is one test that test all the UI interactions of the system'''
+        self._login(self.username, self.password)
         self._signup_user("wpass", "wpass@wpass.com", "12345678", "87654321", False)
+        
+        # Test the existance of tracking, history, entry and renewal since start.
+        tab_tracking = self.web_driver.find_element_by_name("tab_tracking")
+        tab_history = self.web_driver.find_element_by_name("tab_history")
+        btn_entry = self.web_driver.find_element_by_name("btn_entry")
+        btn_renewal = self.web_driver.find_element_by_name("btn_renewal")
+
+        self.assertEqual(len(tab_tracking), 1)
+        self.assertEqual(len(tab_history), 1)
+        self.assertEqual(len(btn_entry), 1)
+        self.assertEqual(len(btn_renewal), 1)
+
+        # Test adding renewal.
         input_confirmation = self.web_driver.find_element_by_id("confirmation")
         self.assertEqual(input_confirmation.get_attribute("class"), "form-control is-invalid")
         div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
         self.assertEqual(div_feedback.text, "Invalid password. Please ensure your passwords are the same.")
+
+        # Test adding a new tracking where the renewal date is known
+        # Test marking as reported
+        # Test delete
+            # Test add then delete
+        # Test departure
+            # Test marking a tracking as renewal
+        # Test clicking on history to check records
+        # Test adding a tracking with entry date. 
+        # Test marking as reported to check history
+            # The history has one more record
+        # Testing undo
+            # Testing list history after undo
+            # Test undo when there is an active tracking 
+
 
     
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
@@ -248,7 +280,7 @@ class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.web_driver = webdriver.Chrome(options=options)
-        self._signup_user("test", "test@test.com", "12345678", "12345678")
+        self._signup_user(self.username, self.email, self.password, self.password)
         # For the rest of the test methods, please refer to UITestCase
 
 class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
@@ -258,4 +290,4 @@ class UITestCaseFirefox(UITestCase, StaticLiveServerTestCase):
         options = webdriver.FirefoxOptions()
         options.headless = True
         self.web_driver = webdriver.Firefox(options=options)
-        self._signup_user("test", "test@test.com", "12345678", "12345678")
+        self._signup_user(self.username, self.email, self.password, self.password)
