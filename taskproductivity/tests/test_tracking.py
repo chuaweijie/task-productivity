@@ -250,24 +250,66 @@ class UITestCase(UIBaseCase):
         self.assertEqual(len(tab_history), 1)
         self.assertEqual(len(btn_entry), 1)
         self.assertEqual(len(btn_renewal), 1)
+        # TODO: I suspect I will need to add test cases to test if the tab is active or not. 
 
         # Test adding renewal.
-        input_confirmation = self.web_driver.find_element_by_id("confirmation")
-        self.assertEqual(input_confirmation.get_attribute("class"), "form-control is-invalid")
-        div_feedback = self.web_driver.find_element_by_id("div_confirmation_feedback")
-        self.assertEqual(div_feedback.text, "Invalid password. Please ensure your passwords are the same.")
+        btn_renewal[0].click()
 
-        # Test adding a new tracking where the renewal date is known
-        # Test marking as reported
-        # Test delete
+        date_renewal = self.web_driver.find_element_by_id("date_renewal")
+        date_renewal.click()
+        date_renewal.send_keys("04052021")
+
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        btn_submit.click()
+
+        # Check the page render after the renewal adding has been added successfully. 
+        row_entry = self.web_driver.find_element_by_name("row_entry")
+        row_online_start = self.web_driver.find_element_by_name("row_online_start")
+        row_online_end = self.web_driver.find_element_by_name("row_online_end")
+        row_renewal = self.web_driver.find_element_by_name("row_renewal")
+        btn_renew = self.web_driver.find_element_by_name("btn_renew")
+        btn_departure = self.web_driver.find_element_by_name("btn_departure")
+        btn_gcal = self.web_driver.find_element_by_name("btn_gcal")
+        btn_ical = self.web_driver.find_element_by_name("btn_ical")
+        btn_outlook = self.web_driver.find_element_by_name("btn_outlook")
+        btn_yahoo = self.web_driver.find_element_by_name("btn_yahoo")
+
+        # Check UI elements
+        self.assertEqual(len(row_entry), 1)
+        self.assertEqual(len(row_online_start), 1)
+        self.assertEqual(len(row_online_end), 1)
+        self.assertEqual(len(row_renewal), 1)
+        self.assertEqual(len(btn_renew), 1)
+        self.assertEqual(len(btn_departure), 1)
+        self.assertEqual(len(btn_gcal), 1)
+        self.assertEqual(len(btn_ical), 1)
+        self.assertEqual(len(btn_outlook), 1)
+        self.assertEqual(len(btn_yahoo), 1)
+
+        # Check texts on buttons
+        self.assertEqual(btn_renew[0].text, "Renew")
+        self.assertEquan(btn_departure[0].text, "Departure")
+
+        # Check data
+        self.assertEqual(row_entry[0].text, "-")
+        self.assertEqual(row_online_start[0].text, "20 April 2021")
+        self.assertEqual(row_online_end[0].text, "27 April 2021")
+        self.assertEqual(row_renewal[0].text, "4 May 2021")
+        
+
+
+        # TODO Test adding a new tracking where the renewal date is known
+
+        # TODO Test marking as reported
+        # TODO Test delete
             # Test add then delete
-        # Test departure
+        # TODO Test departure
             # Test marking a tracking as renewal
-        # Test clicking on history to check records
-        # Test adding a tracking with entry date. 
-        # Test marking as reported to check history
+        # TODO Test clicking on history to check records
+        # TODO Test adding a tracking with entry date. 
+        # TODO Test marking as reported to check history
             # The history has one more record
-        # Testing undo
+        # TODO Testing undo
             # Testing list history after undo
             # Test undo when there is an active tracking 
 
