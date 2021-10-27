@@ -234,13 +234,7 @@ class UITestCase(UIBaseCase):
         self.email = "test_user@test.com"
         self.password = "12345678"
 
-    # Write the test for both browsers here. 
-    def test_full_tracking_flow(self):
-        '''This is one test that test all the UI interactions of the system'''
-        self._login(self.username, self.password)
-        self._signup_user("wpass", "wpass@wpass.com", "12345678", "87654321", False)
-        
-        # Test the existance of tracking, history, entry and renewal since start.
+    def _check_tracking_elements_blank(self):
         tab_tracking = self.web_driver.find_element_by_name("tab_tracking")
         tab_history = self.web_driver.find_element_by_name("tab_history")
         btn_entry = self.web_driver.find_element_by_name("btn_entry")
@@ -250,10 +244,55 @@ class UITestCase(UIBaseCase):
         self.assertEqual(len(tab_history), 1)
         self.assertEqual(len(btn_entry), 1)
         self.assertEqual(len(btn_renewal), 1)
+
+    def _check_tracking_elements_with_record(self, entry, online_start, online_end, renewal):
+        row_entry = self.web_driver.find_element_by_name("row_entry")
+        row_online_start = self.web_driver.find_element_by_name("row_online_start")
+        row_online_end = self.web_driver.find_element_by_name("row_online_end")
+        row_renewal = self.web_driver.find_element_by_name("row_renewal")
+        btn_renew = self.web_driver.find_element_by_name("btn_renew")
+        btn_departure = self.web_driver.find_element_by_name("btn_departure")
+        btn_delete = self.web_driver.find_element_by_name("btn_delete")
+        btn_gcal = self.web_driver.find_element_by_name("btn_gcal")
+        btn_ical = self.web_driver.find_element_by_name("btn_ical")
+        btn_outlook = self.web_driver.find_element_by_name("btn_outlook")
+        btn_yahoo = self.web_driver.find_element_by_name("btn_yahoo")
+
+        # Reneal: Check UI elements
+        self.assertEqual(len(row_entry), 1)
+        self.assertEqual(len(row_online_start), 1)
+        self.assertEqual(len(row_online_end), 1)
+        self.assertEqual(len(row_renewal), 1)
+        self.assertEqual(len(btn_renew), 1)
+        self.assertEqual(len(btn_departure), 1)
+        self.assertEqual(len(btn_delete), 1)
+        self.assertEqual(len(btn_gcal), 1)
+        self.assertEqual(len(btn_ical), 1)
+        self.assertEqual(len(btn_outlook), 1)
+        self.assertEqual(len(btn_yahoo), 1)
+
+        # Renewal: Check texts on buttons
+        self.assertEqual(btn_renew[0].text, "Renew")
+        self.assertEquan(btn_departure[0].text, "Departure")
+
+        self.assertEqual(row_entry[0].text, entry)
+        self.assertEqual(row_online_start[0].text, online_start)
+        self.assertEqual(row_online_end[0].text, online_end)
+        self.assertEqual(row_renewal[0].text, renewal)
+
+    # Write the test for both browsers here. 
+    def test_full_tracking_flow(self):
+        '''This is one test that test all the UI interactions of the system'''
+        self._login(self.username, self.password)
+        self._signup_user("wpass", "wpass@wpass.com", "12345678", "87654321", False)
+        
+        # Test the existance of tracking, history, entry and renewal since start.
+        self._check_tracking_elements_blank()
         # TODO: I suspect I will need to add test cases to test if the tab is active or not. 
 
         # Test adding renewal.
-        btn_renewal[0].click()
+        btn_renewal = self.web_driver.find_element_by_id("btn_renewal")
+        btn_renewal.click()
 
         date_renewal = self.web_driver.find_element_by_id("date_renewal")
         date_renewal.click()
@@ -262,47 +301,40 @@ class UITestCase(UIBaseCase):
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         btn_submit.click()
 
-        # Check the page render after the renewal adding has been added successfully. 
-        row_entry = self.web_driver.find_element_by_name("row_entry")
-        row_online_start = self.web_driver.find_element_by_name("row_online_start")
-        row_online_end = self.web_driver.find_element_by_name("row_online_end")
-        row_renewal = self.web_driver.find_element_by_name("row_renewal")
-        btn_renew = self.web_driver.find_element_by_name("btn_renew")
-        btn_departure = self.web_driver.find_element_by_name("btn_departure")
-        btn_gcal = self.web_driver.find_element_by_name("btn_gcal")
-        btn_ical = self.web_driver.find_element_by_name("btn_ical")
-        btn_outlook = self.web_driver.find_element_by_name("btn_outlook")
-        btn_yahoo = self.web_driver.find_element_by_name("btn_yahoo")
-
-        # Check UI elements
-        self.assertEqual(len(row_entry), 1)
-        self.assertEqual(len(row_online_start), 1)
-        self.assertEqual(len(row_online_end), 1)
-        self.assertEqual(len(row_renewal), 1)
-        self.assertEqual(len(btn_renew), 1)
-        self.assertEqual(len(btn_departure), 1)
-        self.assertEqual(len(btn_gcal), 1)
-        self.assertEqual(len(btn_ical), 1)
-        self.assertEqual(len(btn_outlook), 1)
-        self.assertEqual(len(btn_yahoo), 1)
-
-        # Check texts on buttons
-        self.assertEqual(btn_renew[0].text, "Renew")
-        self.assertEquan(btn_departure[0].text, "Departure")
-
-        # Check data
-        self.assertEqual(row_entry[0].text, "-")
-        self.assertEqual(row_online_start[0].text, "20 April 2021")
-        self.assertEqual(row_online_end[0].text, "27 April 2021")
-        self.assertEqual(row_renewal[0].text, "4 May 2021")
+        # Renewal: Check the page render after the renewal adding has been added successfully. 
+        self._check_tracking_elements_with_record("-", "20 April 2021", "27 April 2021", "4 May 2021")
         
+        btn_renew = self.web_driver.find_element_by_id("btn_renew")
+        btn_renew.click()
 
+        # Test cancel button after 
+        btn_cancel = self.web_driver.find_element_by_id("btn_cancel")
+        btn_cancel.click()
 
-        # TODO Test adding a new tracking where the renewal date is known
+        btn_renew = self.web_driver.find_element_by_id("btn_renew")
+        btn_renew.click()
 
-        # TODO Test marking as reported
-        # TODO Test delete
-            # Test add then delete
+        date_renewal = self.web_driver.find_element_by_id("date_renewal")
+        date_renewal.click()
+        date_renewal.send_keys("04062021")
+
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        btn_submit.click()
+
+        # Reported: Check the page render after the renewal adding has been added successfully. 
+        self._check_tracking_elements_with_record("-", "20 May 2021", "27 May 2021", "4 June 2021")
+        
+        # Test delete
+        btn_delete = self.web_driver.find_element_by_id("btn_delete")
+        btn_delete.click()
+        btn_cancel = self.web_driver.find_element_by_id("btn_cancel")
+        btn_cancel.click()
+        btn_delete = self.web_driver.find_element_by_id("btn_delete")
+        btn_delete.click()
+        btn_yes = self.web_driver.find_element_by_id("btn_yes")
+        btn_yes.click()
+
+        self._check_tracking_elements_blank()
         # TODO Test departure
             # Test marking a tracking as renewal
         # TODO Test clicking on history to check records
