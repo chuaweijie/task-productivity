@@ -47,6 +47,7 @@ class ViewTestCase(ViewBaseCase):
             "reported_date": datetime.fromisoformat('2021-06-04').timestamp()
         }
         response = self._csrf_put("/tracking" ,data, True)
+        # BUG Logical error. The system should auto calculate and return data.
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
@@ -250,8 +251,8 @@ class UITestCase(UIBaseCase):
         row_online_start = self.web_driver.find_element_by_name("row_online_start")
         row_online_end = self.web_driver.find_element_by_name("row_online_end")
         row_renewal = self.web_driver.find_element_by_name("row_renewal")
-        btn_renew = self.web_driver.find_element_by_name("btn_renew")
-        btn_departure = self.web_driver.find_element_by_name("btn_departure")
+        btn_report = self.web_driver.find_element_by_name("btn_report")
+        btn_depart = self.web_driver.find_element_by_name("btn_depart")
         btn_delete = self.web_driver.find_element_by_name("btn_delete")
         btn_gcal = self.web_driver.find_element_by_name("btn_gcal")
         btn_ical = self.web_driver.find_element_by_name("btn_ical")
@@ -263,8 +264,8 @@ class UITestCase(UIBaseCase):
         self.assertEqual(len(row_online_start), 1)
         self.assertEqual(len(row_online_end), 1)
         self.assertEqual(len(row_renewal), 1)
-        self.assertEqual(len(btn_renew), 1)
-        self.assertEqual(len(btn_departure), 1)
+        self.assertEqual(len(btn_report), 1)
+        self.assertEqual(len(btn_depart), 1)
         self.assertEqual(len(btn_delete), 1)
         self.assertEqual(len(btn_gcal), 1)
         self.assertEqual(len(btn_ical), 1)
@@ -272,13 +273,24 @@ class UITestCase(UIBaseCase):
         self.assertEqual(len(btn_yahoo), 1)
 
         # Renewal: Check texts on buttons
-        self.assertEqual(btn_renew[0].text, "Renew")
-        self.assertEquan(btn_departure[0].text, "Departure")
+        self.assertEqual(btn_report[0].text, "Report")
+        self.assertEquan(btn_depart[0].text, "Depart")
 
         self.assertEqual(row_entry[0].text, entry)
         self.assertEqual(row_online_start[0].text, online_start)
         self.assertEqual(row_online_end[0].text, online_end)
         self.assertEqual(row_renewal[0].text, renewal)
+
+    def _renew(self, date):
+        btn_renewal = self.web_driver.find_element_by_id("btn_renewal")
+        btn_renewal.click()
+
+        date_renewal = self.web_driver.find_element_by_id("date_renewal")
+        date_renewal.click()
+        date_renewal.send_keys(date)
+
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        btn_submit.click()
 
     # Write the test for both browsers here. 
     def test_full_tracking_flow(self):
@@ -291,15 +303,7 @@ class UITestCase(UIBaseCase):
         # TODO: I suspect I will need to add test cases to test if the tab is active or not. 
 
         # Test adding renewal.
-        btn_renewal = self.web_driver.find_element_by_id("btn_renewal")
-        btn_renewal.click()
-
-        date_renewal = self.web_driver.find_element_by_id("date_renewal")
-        date_renewal.click()
-        date_renewal.send_keys("04052021")
-
-        btn_submit = self.web_driver.find_element_by_id("btn_submit")
-        btn_submit.click()
+        self._renew("04052021")
 
         # Renewal: Check the page render after the renewal adding has been added successfully. 
         self._check_tracking_elements_with_record("-", "20 April 2021", "27 April 2021", "4 May 2021")
@@ -311,18 +315,10 @@ class UITestCase(UIBaseCase):
         btn_cancel = self.web_driver.find_element_by_id("btn_cancel")
         btn_cancel.click()
 
-        btn_renew = self.web_driver.find_element_by_id("btn_renew")
-        btn_renew.click()
-
-        date_renewal = self.web_driver.find_element_by_id("date_renewal")
-        date_renewal.click()
-        date_renewal.send_keys("04062021")
-
-        btn_submit = self.web_driver.find_element_by_id("btn_submit")
-        btn_submit.click()
+        self._renew("04062021")
 
         # Reported: Check the page render after the renewal adding has been added successfully. 
-        self._check_tracking_elements_with_record("-", "20 May 2021", "27 May 2021", "4 June 2021")
+        self._check_tracking_elements_with_record("-", "21 May 2021", "28 May 2021", "4 June 2021")
         
         # Test delete
         btn_delete = self.web_driver.find_element_by_id("btn_delete")
@@ -335,11 +331,71 @@ class UITestCase(UIBaseCase):
         btn_yes.click()
 
         self._check_tracking_elements_blank()
-        # TODO Test departure
-            # Test marking a tracking as renewal
-        # TODO Test clicking on history to check records
-        # TODO Test adding a tracking with entry date. 
-        # TODO Test marking as reported to check history
+        
+        self._renew("04072021")
+        self._check_tracking_elements_with_record("-", "20 June 2021", "27 June 2021", "4 July 2021")
+
+        # Test departure
+        btn_depart = self.web_driver.find_element_by_id("btn_depart")
+        btn_depart.click()
+
+        date_depart = self.web_driver.find_element_by_id("date_depart")
+        date_depart.click()
+        date_depart.send_keys("15072021")
+
+        self._check_tracking_elements_blank()
+        
+        # Test clicking on history to check records
+        tab_history = self.web_driver.find_element_by_id("tab_history")
+        tab_history.click()
+        data = [{   "id": 1,
+                    "entry": "-", 
+                    "renewal": "4 May 2021", 
+                    "online_start": "20 April 2021",
+                    "online_end": "27 April 2021",
+                    "depart": "-",
+                    "reported_date": "4 June 2021"},
+                {   "id": 3,
+                    "entry": "-", 
+                    "renewal": "4 July 2021", 
+                    "online_start": "20 June 2021",
+                    "online_end": "27 June 2021",
+                    "depart": "15 July 2021",
+                    "reported_date": "-"}]
+
+        tbl_history_id = self.web_driver.find_element_by_name("tbl_history_id")
+        tbl_history_entry = self.web_driver.find_element_by_name("tbl_history_entry")
+        tbl_history_renewal = self.web_driver.find_element_by_name("tbl_history_renewal")
+        tbl_history_online_start = self.web_driver.find_element_by_name("tbl_history_online_start")
+        tbl_history_online_end = self.web_driver.find_element_by_name("tbl_history_online_end")
+        tbl_history_depart = self.web_driver.find_element_by_name("tbl_history_depart")
+        tbl_history_reported_date = self.web_driver.find_element_by_name("tbl_history_reported_date")
+
+        for i in range(2):
+            self.assertEqual(tbl_history_id[i].text, data[i]["id"])
+            self.assertEqual(tbl_history_entry[i].text, data[i]["entry"])
+            self.assertEqual(tbl_history_renewal[i].text, data[i]["renewal"])
+            self.assertEqual(tbl_history_online_start[i].text, data[i]["online_start"])
+            self.assertEqual(tbl_history_online_end[i].text, data[i]["online_end"])
+            self.assertEqual(tbl_history_depart[i].text, data[i]["depart"])
+            self.assertEqual(tbl_history_reported_date[i].text, data[i]["reported_date"])
+
+        # Test adding a tracking with entry date.
+        tab_tracking = self.web_driver.find_element_by_id("tab_tracking")
+        tab_tracking.click()
+
+        btn_entry = self.web_driver.find_element_by_id("btn_entry")
+        btn_entry.click()
+        date_depart = self.web_driver.find_element_by_id("date_entry")
+        date_depart.click()
+        date_depart.send_keys("04082021")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        btn_submit.click()
+
+        self._check_tracking_elements_with_record("4 August 2021", "21 August 2021", "28 August 2021", "3 September 2021")
+
+        # Test marking as reported to check history
+
             # The history has one more record
         # TODO Testing undo
             # Testing list history after undo
