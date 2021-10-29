@@ -48,8 +48,14 @@ class ViewTestCase(ViewBaseCase):
         }
         response = self._csrf_put("/tracking" ,data, True)
         # BUG Logical error. The system should auto calculate and return data.
-        self.assertEqual(response.json(), {"status": "successful",
-                                            "data": None
+        online_start = datetime.fromisoformat('2021-06-04') - timedelta(days=14)
+        online_end = datetime.fromisoformat('2021-06-04') - timedelta(days=7)
+        self.assertEqual(response.json(), { "status": "successful",
+                                            "data": {   "id": 2,
+                                                        "entry": None, 
+                                                        "renewal": datetime.fromisoformat('2021-06-04').timestamp(), 
+                                                        "online_start": online_start.timestamp(),
+                                                        "online_end": online_end.timestamp()}
                                             })
 
         response = self.client.get("/history")
@@ -63,20 +69,6 @@ class ViewTestCase(ViewBaseCase):
                                                         "reported_date": datetime.fromisoformat('2021-06-04').timestamp()}]
                                             })
         
-        data = {
-            "mode": "renewal", 
-            "renewal": datetime.fromisoformat('2021-06-04').timestamp()
-        }
-        response = self._csrf_post("/tracking" ,data, True)
-        online_start = datetime.fromisoformat('2021-06-04') - timedelta(days=14)
-        online_end = datetime.fromisoformat('2021-06-04') - timedelta(days=7)
-        self.assertEqual(response.json(), { "status": "successful",
-                                            "data": {   "id": 2,
-                                                        "entry": None, 
-                                                        "renewal": datetime.fromisoformat('2021-06-04').timestamp(), 
-                                                        "online_start": online_start.timestamp(),
-                                                        "online_end": online_end.timestamp()}
-                                            })
         # Test delete
         data = {
             "id": 2

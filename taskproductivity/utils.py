@@ -68,3 +68,4 @@ def convert_to_timestamp(entry, renewal, online_start, online_end, departure=Non
         return entry, renewal, online_start, online_end
     else:
         return entry, renewal, online_start, online_end, departure, reported_date
+

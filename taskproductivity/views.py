@@ -17,6 +17,24 @@ from datetime import timedelta, datetime
 
 from taskproductivity.models import ERDates, User, Recoveries
 
+# Helper function. Not sure where to put it so I'll put it here first.
+def new_renewal_date(renewal_date, user):
+    online_start = renewal_date - timedelta(days=14)
+    online_end = renewal_date - timedelta(days=7)
+    try:
+        erdate = ERDates.objects.create(user=user, renewal=renewal_date, online_start=online_start, online_end=online_end)
+    except IntegrityError as e:
+        print(e)
+        return JsonResponse({"error":e},status=400)
+    entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
+    return JsonResponse({   "status": "successful",
+                            "data": {   "id": erdate.id,
+                                        "entry": entry, 
+                                        "renewal": renewal, 
+                                        "online_start": online_start,
+                                        "online_end": online_end}
+                        }, status=200)
+
 # Create your views here.
 @ensure_csrf_cookie
 def index(request):
@@ -272,22 +290,10 @@ def tracking(request):
     elif request.method == "POST":
         mode = data.get("mode")
         if mode == "renewal":
+            # TODO refractor this into a function
             renewal = datetime.fromtimestamp(int(data.get("renewal")))
-            online_start = renewal - timedelta(days=14)
-            online_end = renewal - timedelta(days=7)
-            try:
-                erdate = ERDates.objects.create(user=request.user, renewal=renewal, online_start=online_start, online_end=online_end)
-            except IntegrityError as e:
-                print(e)
-                return JsonResponse({"error":e},status=400)
-            entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
-            return JsonResponse({   "status": "successful",
-                                    "data": {   "id": erdate.id,
-                                                "entry": entry, 
-                                                "renewal": renewal, 
-                                                "online_start": online_start,
-                                                "online_end": online_end}
-                                }, status=200)
+            return new_renewal_date(renewal, request.user)
+
         elif mode == "entry":
             entry = datetime.fromtimestamp(int(data.get("entry")))
             renewal = entry + timedelta(days=90)
@@ -329,10 +335,10 @@ def tracking(request):
             except IntegrityError as e:
                 print(e)
                 return JsonResponse({"error":e}, status=400)
-            # If update is successful
-            return JsonResponse({   "status": "successful",
-                                    "data": None
-                                }, status=200)
+            # If update is successful, create a new tracking record from the reported date. 
+            # TODO refractor this into a function
+            return new_renewal_date(reported_date, request.user)
+            
     elif request.method == "DELETE":
         ERDate_id = data.get("id")
         try:
@@ -373,3 +379,5 @@ def history(request):
             return JsonResponse({"status": "Error",
                                 "msg":"Active tracking data"
                                 }, status=400)
+
+
