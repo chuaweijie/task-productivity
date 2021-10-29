@@ -337,6 +337,7 @@ def tracking(request):
                 return JsonResponse({"error":e}, status=400)
             # If update is successful, create a new tracking record from the reported date. 
             # TODO refractor this into a function
+            reported_date = reported_date + timedelta(days=90)
             return new_renewal_date(reported_date, request.user)
             
     elif request.method == "DELETE":

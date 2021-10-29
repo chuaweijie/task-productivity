@@ -53,9 +53,9 @@ class ViewTestCase(ViewBaseCase):
         self.assertEqual(response.json(), { "status": "successful",
                                             "data": {   "id": 2,
                                                         "entry": None, 
-                                                        "renewal": datetime.fromisoformat('2021-06-04').timestamp(), 
-                                                        "online_start": online_start.timestamp(),
-                                                        "online_end": online_end.timestamp()}
+                                                        "renewal": (datetime.fromisoformat('2021-06-04') + timedelta(days=90)).timestamp(),
+                                                        "online_start": (datetime.fromisoformat('2021-06-04') + timedelta(days=90) - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-06-04') + timedelta(days=90) - timedelta(days=7)).timestamp()}
                                             })
 
         response = self.client.get("/history")
@@ -63,8 +63,8 @@ class ViewTestCase(ViewBaseCase):
                                             "data": [{   "id": 1,
                                                         "entry": None, 
                                                         "renewal": datetime.fromisoformat('2021-05-04').timestamp(), 
-                                                        "online_start": online_start.timestamp(),
-                                                        "online_end": online_end.timestamp(),
+                                                        "online_start": (datetime.fromisoformat('2021-05-04') - timedelta(days=14)).timestamp(),
+                                                        "online_end": (datetime.fromisoformat('2021-05-04') - timedelta(days=7)).timestamp(),
                                                         "departure": None,
                                                         "reported_date": datetime.fromisoformat('2021-06-04').timestamp()}]
                                             })
@@ -146,6 +146,18 @@ class ViewTestCase(ViewBaseCase):
             "reported_date": datetime.fromisoformat('2021-08-31').timestamp()
         }
         response = self._csrf_put("/tracking" ,data, True)
+        self.assertEqual(response.json(), { "status": "successful",
+                                    "data": {   "id": 5,
+                                                "entry": None, 
+                                                "renewal": (datetime.fromisoformat('2021-08-31') + timedelta(days=90)).timestamp(),
+                                                "online_start": (datetime.fromisoformat('2021-08-31') + timedelta(days=90) - timedelta(days=14)).timestamp(),
+                                                "online_end": (datetime.fromisoformat('2021-08-31') + timedelta(days=90) - timedelta(days=7)).timestamp()}
+                                    })
+        
+        data = {
+            "id": 5
+        }
+        response = self._csrf_delete("/tracking", data, True)
         self.assertEqual(response.json(), {"status": "successful",
                                             "data": None
                                             })
