@@ -1,0 +1,13 @@
+{% extends "taskproductivity/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <div id="div_main_ui" name="div_main_ui"></div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script type="module" src="{% static 'taskproductivity/js/main.js' %}"></script>
+{% endblock %}

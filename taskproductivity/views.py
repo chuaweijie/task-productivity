@@ -2,6 +2,7 @@ import json, hashlib
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -50,7 +51,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("tasks"))
+            return HttpResponseRedirect(reverse("main"))
         else:
             return render(request, "taskproductivity/login.html", {
                 "type": "danger",
@@ -91,7 +92,7 @@ def signup(request):
             }, status=400)
         login(request, user)
         # Should redirect to task in the future
-        return HttpResponseRedirect(reverse("tasks"))
+        return HttpResponseRedirect(reverse("main"))
     else:
         return render(request, "taskproductivity/signup.html")
 
@@ -129,23 +130,6 @@ def username(request):
     else:
         raise PermissionDenied
 
-def tasks(request):
-    if request.method == "GET":
-        return render(request, "taskproductivity/tasks.html")
-    else:
-        raise PermissionDenied
-
-def task_data(request, user_id, page_no):
-    response = {}
-    return JsonResponse(response)
-
-def man_task(request):
-    response = {}
-    return JsonResponse(response)
-
-
-def report(request):
-    return render(request, "taskproductivity/report.html")
 
 @ensure_csrf_cookie
 def recovery(request):
@@ -381,4 +365,7 @@ def history(request):
                                 "msg":"Active tracking data"
                                 }, status=400)
 
-
+@login_required
+def main(request):
+    if request.method == "GET":
+        return render(request, "taskproductivity/main.html")
