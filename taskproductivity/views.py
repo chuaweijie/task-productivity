@@ -40,7 +40,10 @@ def new_renewal_date(renewal_date, user):
 @ensure_csrf_cookie
 def index(request):
     # How to check if the user is already logged in? 
-    return render(request, "taskproductivity/index.html")
+    if not request.user.is_authenticated:
+        return render(request, "taskproductivity/index.html")
+    elif request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("main"))
 
 def login_view(request):
     if request.method == "POST":
