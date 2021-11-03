@@ -37,6 +37,15 @@ var Main = function (_React$Component) {
     _createClass(Main, [{
         key: 'switchTracking',
         value: function switchTracking(e) {
+            fetch('/tracking').then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                if (data.error) {
+                    console.log(data.error);
+                } else {
+                    console.log(data);
+                }
+            });
             this.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null });
         }
     }, {
@@ -52,22 +61,22 @@ var Main = function (_React$Component) {
                 null,
                 React.createElement(
                     'ul',
-                    { 'class': 'nav nav-tabs' },
+                    { className: 'nav nav-tabs' },
                     React.createElement(
                         'li',
-                        { 'class': 'nav-item' },
+                        { className: 'nav-item' },
                         React.createElement(
                             'a',
-                            { 'class': this.state.trackingClass, id: 'tab_tracking', name: 'tab_tracking', 'aria-current': 'page', href: '#', onClick: this.switchTracking },
+                            { className: this.state.trackingClass, id: 'tab_tracking', name: 'tab_tracking', 'aria-current': 'page', href: '#', onClick: this.switchTracking },
                             'Tracking'
                         )
                     ),
                     React.createElement(
                         'li',
-                        { 'class': 'nav-item' },
+                        { className: 'nav-item' },
                         React.createElement(
                             'a',
-                            { 'class': this.state.historyClass, id: 'tab_history', name: 'tab_history', 'aria-current': 'page', href: '#', onClick: this.switchHistory },
+                            { className: this.state.historyClass, id: 'tab_history', name: 'tab_history', 'aria-current': 'page', href: '#', onClick: this.switchHistory },
                             'History'
                         )
                     )
@@ -97,9 +106,37 @@ var Tracking = function (_React$Component2) {
         key: 'render',
         value: function render() {
             return React.createElement(
-                'h1',
-                null,
-                'Tracking'
+                'table',
+                { className: 'table' },
+                React.createElement(
+                    'thead',
+                    null,
+                    React.createElement(
+                        'tr',
+                        null,
+                        React.createElement(
+                            'th',
+                            { scope: 'col' },
+                            'Entry'
+                        ),
+                        React.createElement(
+                            'th',
+                            { scope: 'col' },
+                            'Online Start'
+                        ),
+                        React.createElement(
+                            'th',
+                            { scope: 'col' },
+                            'Online End'
+                        ),
+                        React.createElement(
+                            'th',
+                            { scope: 'col' },
+                            'Renewal'
+                        ),
+                        React.createElement('th', { scope: 'col' })
+                    )
+                )
             );
         }
     }]);

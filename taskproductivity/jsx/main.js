@@ -22,6 +22,16 @@ class Main extends React.Component {
     }
 
     switchTracking(e) {
+        fetch(`/tracking`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error)  {
+                console.log(data.error);
+            }
+            else {
+                console.log(data);
+            }
+        });
         this.setState({trackingClass: "nav-link active", historyClass: "nav-link", tracking: <Tracking/>, history: null});
     }
 
@@ -32,12 +42,12 @@ class Main extends React.Component {
     render() {
         return (
             <div>
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class={this.state.trackingClass} id="tab_tracking" name="tab_tracking" aria-current="page" href="#" onClick={this.switchTracking}>Tracking</a>
+                <ul className="nav nav-tabs">
+                    <li className="nav-item">
+                        <a className={this.state.trackingClass} id="tab_tracking" name="tab_tracking" aria-current="page" href="#" onClick={this.switchTracking}>Tracking</a>
                     </li>
-                    <li class="nav-item">
-                        <a class={this.state.historyClass} id="tab_history" name="tab_history" aria-current="page" href="#" onClick={this.switchHistory}>History</a>
+                    <li className="nav-item">
+                        <a className={this.state.historyClass} id="tab_history" name="tab_history" aria-current="page" href="#" onClick={this.switchHistory}>History</a>
                     </li>
                 </ul>
                 {this.state.tracking}
@@ -57,7 +67,17 @@ class Tracking extends React.Component {
 
     render(){
         return (
-            <h1>Tracking</h1>
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Entry</th>
+                        <th scope="col">Online Start</th>
+                        <th scope="col">Online End</th>
+                        <th scope="col">Renewal</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+            </table>
         );
     }
 }
