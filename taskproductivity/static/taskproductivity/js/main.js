@@ -30,44 +30,50 @@ var Main = function (_React$Component) {
 
         _this.switchTracking = _this.switchTracking.bind(_this);
         _this.switchHistory = _this.switchHistory.bind(_this);
-        _this.state = { trackingClass: "nav-link active", historyClass: "nav-link" };
+        _this.state = { trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null };
         return _this;
     }
 
     _createClass(Main, [{
         key: 'switchTracking',
         value: function switchTracking(e) {
-            this.setState({ trackingClass: "nav-link active", historyClass: "nav-link" });
+            this.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null });
         }
     }, {
         key: 'switchHistory',
         value: function switchHistory(e) {
-            this.setState({ trackingClass: "nav-link", historyClass: "nav-link active" });
+            this.setState({ trackingClass: "nav-link", historyClass: "nav-link active", tracking: null, history: React.createElement(History, null) });
         }
     }, {
         key: 'render',
         value: function render() {
             return React.createElement(
-                'ul',
-                { 'class': 'nav nav-tabs' },
+                'div',
+                null,
                 React.createElement(
-                    'li',
-                    { 'class': 'nav-item' },
+                    'ul',
+                    { 'class': 'nav nav-tabs' },
                     React.createElement(
-                        'a',
-                        { 'class': this.state.trackingClass, id: 'tab_tracking', name: 'tab_tracking', 'aria-current': 'page', href: '#', onClick: this.switchTracking },
-                        'Tracking'
+                        'li',
+                        { 'class': 'nav-item' },
+                        React.createElement(
+                            'a',
+                            { 'class': this.state.trackingClass, id: 'tab_tracking', name: 'tab_tracking', 'aria-current': 'page', href: '#', onClick: this.switchTracking },
+                            'Tracking'
+                        )
+                    ),
+                    React.createElement(
+                        'li',
+                        { 'class': 'nav-item' },
+                        React.createElement(
+                            'a',
+                            { 'class': this.state.historyClass, id: 'tab_history', name: 'tab_history', 'aria-current': 'page', href: '#', onClick: this.switchHistory },
+                            'History'
+                        )
                     )
                 ),
-                React.createElement(
-                    'li',
-                    { 'class': 'nav-item' },
-                    React.createElement(
-                        'a',
-                        { 'class': this.state.historyClass, id: 'tab_history', name: 'tab_history', 'aria-current': 'page', href: '#', onClick: this.switchHistory },
-                        'History'
-                    )
-                )
+                this.state.tracking,
+                this.state.history
             );
         }
     }]);
@@ -76,107 +82,53 @@ var Main = function (_React$Component) {
 }(React.Component);
 
 // Write the UI
-/*class Tracking extends React.Component {
-    constructor(props) {
-        super(props);
-        this.newPost = this.newPost.bind(this);
-        this.checkTxtArea = this.checkTxtArea.bind(this);
-        this.state = {btn_disabled: true, value: ""};
+
+
+var Tracking = function (_React$Component2) {
+    _inherits(Tracking, _React$Component2);
+
+    function Tracking(props) {
+        _classCallCheck(this, Tracking);
+
+        return _possibleConstructorReturn(this, (Tracking.__proto__ || Object.getPrototypeOf(Tracking)).call(this, props));
     }
 
-    newPost(e) {
-        const post_text = document.querySelector("#txtarea_post");
-        const csrftoken = getCookie('csrftoken');
-        fetch('/save_post', {
-            method: 'PUT',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({
-                post: post_text.value
-            })
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if(result.error) {
-                console.log("Error");
-            }
-            else {
-                this.setState({btn_disabled: true, value: ""});
-                getAllPosts('#posts');
-            }
-        });
-    }
-
-    checkTxtArea(e) {
-        if (e.target.value.length > 0) {
-            this.setState({btn_disabled: false, value: e.target.value});
+    _createClass(Tracking, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'h1',
+                null,
+                'Tracking'
+            );
         }
-        else {
-            this.setState({btn_disabled: true, value: ""});
-        }
-    }
+    }]);
 
-    render(){
-        return (
-            <div className="form-floating">
-                <textarea className="form-control" id="txtarea_post" name="txtarea_post" style={{height: 100+'px'}} onChange={this.checkTxtArea} value={this.state.value}></textarea>
-                <label htmlFor="txtarea_post">Post</label>
-                <button type="button" disabled={this.state.btn_disabled} className="btn btn-primary mt-1" id="btn_post" name="btn_post" onClick={this.newPost}>Post</button>
-            </div>
-        );
-    }
-}
+    return Tracking;
+}(React.Component);
 
 // Write the UI
-class History extends React.Component {
-    constructor(props) {
-        super(props);
-        this.newPost = this.newPost.bind(this);
-        this.checkTxtArea = this.checkTxtArea.bind(this);
-        this.state = {btn_disabled: true, value: ""};
+
+
+var History = function (_React$Component3) {
+    _inherits(History, _React$Component3);
+
+    function History(props) {
+        _classCallCheck(this, History);
+
+        return _possibleConstructorReturn(this, (History.__proto__ || Object.getPrototypeOf(History)).call(this, props));
     }
 
-    newPost(e) {
-        const post_text = document.querySelector("#txtarea_post");
-        const csrftoken = getCookie('csrftoken');
-        fetch('/save_post', {
-            method: 'PUT',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({
-                post: post_text.value
-            })
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if(result.error) {
-                console.log("Error");
-            }
-            else {
-                this.setState({btn_disabled: true, value: ""});
-                getAllPosts('#posts');
-            }
-        });
-    }
-
-    checkTxtArea(e) {
-        if (e.target.value.length > 0) {
-            this.setState({btn_disabled: false, value: e.target.value});
+    _createClass(History, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'h1',
+                null,
+                'History'
+            );
         }
-        else {
-            this.setState({btn_disabled: true, value: ""});
-        }
-    }
+    }]);
 
-    render(){
-        return (
-            <div className="form-floating">
-                <textarea className="form-control" id="txtarea_post" name="txtarea_post" style={{height: 100+'px'}} onChange={this.checkTxtArea} value={this.state.value}></textarea>
-                <label htmlFor="txtarea_post">Post</label>
-                <button type="button" disabled={this.state.btn_disabled} className="btn btn-primary mt-1" id="btn_post" name="btn_post" onClick={this.newPost}>Post</button>
-            </div>
-        );
-    }
-}*/
+    return History;
+}(React.Component);
