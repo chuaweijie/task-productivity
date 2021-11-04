@@ -18,7 +18,11 @@ class Main extends React.Component {
         super(props);
         this.switchTracking = this.switchTracking.bind(this);
         this.switchHistory = this.switchHistory.bind(this);
-        this.state = {trackingClass: "nav-link active", historyClass: "nav-link", tracking: <Tracking/>, history: null};
+        this.state = {trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <Tracking/>, 
+                        history: null};
+        this.switchTracking
     }
 
     switchTracking(e) {
@@ -29,14 +33,27 @@ class Main extends React.Component {
                 console.log(data.error);
             }
             else {
-                console.log(data);
+                if (data.status == "no data") {
+                    this.setState({trackingClass: "nav-link active", 
+                                    historyClass: "nav-link", 
+                                    tracking: <button>Test</button>, 
+                                    history: null});            
+                }
+                else if (data.status == "successful") {
+                    this.setState({trackingClass: "nav-link active", 
+                                    historyClass: "nav-link", 
+                                    tracking: <Tracking/>, 
+                                    history: null});
+                }
             }
         });
-        this.setState({trackingClass: "nav-link active", historyClass: "nav-link", tracking: <Tracking/>, history: null});
     }
 
     switchHistory(e) {
-        this.setState({trackingClass: "nav-link", historyClass: "nav-link active", tracking: null, history: <History/>});
+        this.setState({trackingClass: "nav-link", 
+                        historyClass: "nav-link active", 
+                        tracking: null, 
+                        history: <History/>});
     }
 
     render() {
@@ -91,6 +108,29 @@ class History extends React.Component {
     render(){
         return (
             <h1>History</h1>
+        );
+    }
+}
+
+
+class Buttons extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render(){
+        return (
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Entry</th>
+                        <th scope="col">Online Start</th>
+                        <th scope="col">Online End</th>
+                        <th scope="col">Renewal</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+            </table>
         );
     }
 }

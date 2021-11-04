@@ -31,12 +31,15 @@ var Main = function (_React$Component) {
         _this.switchTracking = _this.switchTracking.bind(_this);
         _this.switchHistory = _this.switchHistory.bind(_this);
         _this.state = { trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null };
+        _this.switchTracking;
         return _this;
     }
 
     _createClass(Main, [{
         key: 'switchTracking',
         value: function switchTracking(e) {
+            var _this2 = this;
+
             fetch('/tracking').then(function (response) {
                 return response.json();
             }).then(function (data) {
@@ -44,9 +47,19 @@ var Main = function (_React$Component) {
                     console.log(data.error);
                 } else {
                     console.log(data);
+                    console.log(data.data);
+                    console.log(data.status);
+                    if (data.status == "no data") {
+                        _this2.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(
+                                'button',
+                                null,
+                                'Test'
+                            ), history: null });
+                    } else if (data.status == "successful") {
+                        _this2.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null });
+                    }
                 }
             });
-            this.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null });
         }
     }, {
         key: 'switchHistory',
