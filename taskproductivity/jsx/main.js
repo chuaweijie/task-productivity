@@ -18,6 +18,8 @@ class Main extends React.Component {
         super(props);
         this.switchTracking = this.switchTracking.bind(this);
         this.switchHistory = this.switchHistory.bind(this);
+        this.entryHandler = this.entryHandler.bind(this);
+        this.renewalHandler = this.renewalHandler.bind(this);
         this.state = {trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
                         tracking: <Tracking/>, 
@@ -36,7 +38,7 @@ class Main extends React.Component {
                 if (data.status == "no data") {
                     this.setState({trackingClass: "nav-link active", 
                                     historyClass: "nav-link", 
-                                    tracking: <Buttons/>, 
+                                    tracking: <Buttons entryHandler={this.entryHandler} renewalHandler={this.renewalHandler}/>, 
                                     history: null});            
                 }
                 else if (data.status == "successful") {
@@ -47,6 +49,20 @@ class Main extends React.Component {
                 }
             }
         });
+    }
+
+    entryHandler(e) {
+        this.setState({trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <EntryForm/>, 
+                        history: null});            
+    }
+
+    renewalHandler(e) {
+        this.setState({trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <RenewalForm/>, 
+                        history: null});
     }
 
     switchHistory(e) {
@@ -116,19 +132,57 @@ class History extends React.Component {
 class Buttons extends React.Component {
     constructor(props) {
         super(props);
+        this.entry = this.entry.bind(this);
+        this.renewal = this.renewal.bind(this);
     }
 
-    render(){
+    entry(e) {
+        this.props.entryHandler(e);
+    }
+
+    renewal(e) {
+        this.props.renewalHandler(e);
+    }
+
+    render() {
         return (
             <div className="container">
                 <div className="row">
                     <div className="col-sm  text-center">
-                        <button type="button" className="btn btn-secondary btn-lg mt-5">Entry</button>
+                        <button type="button" className="btn btn-secondary btn-lg mt-5" onClick={this.entry}>Entry</button>
                     </div>
                     <div className="col-sm  text-center">
-                        <button type="button" className="btn btn-primary btn-lg mt-5">Renewal Date</button>
+                        <button type="button" className="btn btn-primary btn-lg mt-5" onClick={this.renewal}>Renewal Date</button>
                     </div>
                 </div>
+            </div>
+        );
+    }
+}
+
+class EntryForm extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="container">
+               <h1>Entry Form</h1>
+            </div>
+        );
+    }
+}
+
+class RenewalForm extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="container">
+               <h1>Reneal Form</h1>
             </div>
         );
     }

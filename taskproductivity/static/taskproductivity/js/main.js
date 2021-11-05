@@ -30,6 +30,8 @@ var Main = function (_React$Component) {
 
         _this.switchTracking = _this.switchTracking.bind(_this);
         _this.switchHistory = _this.switchHistory.bind(_this);
+        _this.entryHandler = _this.entryHandler.bind(_this);
+        _this.renewalHandler = _this.renewalHandler.bind(_this);
         _this.state = { trackingClass: "nav-link active",
             historyClass: "nav-link",
             tracking: React.createElement(Tracking, null),
@@ -52,7 +54,7 @@ var Main = function (_React$Component) {
                     if (data.status == "no data") {
                         _this2.setState({ trackingClass: "nav-link active",
                             historyClass: "nav-link",
-                            tracking: React.createElement(Buttons, null),
+                            tracking: React.createElement(Buttons, { entryHandler: _this2.entryHandler, renewalHandler: _this2.renewalHandler }),
                             history: null });
                     } else if (data.status == "successful") {
                         _this2.setState({ trackingClass: "nav-link active",
@@ -62,6 +64,22 @@ var Main = function (_React$Component) {
                     }
                 }
             });
+        }
+    }, {
+        key: 'entryHandler',
+        value: function entryHandler(e) {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(EntryForm, null),
+                history: null });
+        }
+    }, {
+        key: 'renewalHandler',
+        value: function renewalHandler(e) {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(RenewalForm, null),
+                history: null });
         }
     }, {
         key: 'switchHistory',
@@ -194,10 +212,24 @@ var Buttons = function (_React$Component4) {
     function Buttons(props) {
         _classCallCheck(this, Buttons);
 
-        return _possibleConstructorReturn(this, (Buttons.__proto__ || Object.getPrototypeOf(Buttons)).call(this, props));
+        var _this5 = _possibleConstructorReturn(this, (Buttons.__proto__ || Object.getPrototypeOf(Buttons)).call(this, props));
+
+        _this5.entry = _this5.entry.bind(_this5);
+        _this5.renewal = _this5.renewal.bind(_this5);
+        return _this5;
     }
 
     _createClass(Buttons, [{
+        key: 'entry',
+        value: function entry(e) {
+            this.props.entryHandler(e);
+        }
+    }, {
+        key: 'renewal',
+        value: function renewal(e) {
+            this.props.renewalHandler(e);
+        }
+    }, {
         key: 'render',
         value: function render() {
             return React.createElement(
@@ -211,7 +243,7 @@ var Buttons = function (_React$Component4) {
                         { className: 'col-sm  text-center' },
                         React.createElement(
                             'button',
-                            { type: 'button', className: 'btn btn-secondary btn-lg mt-5' },
+                            { type: 'button', className: 'btn btn-secondary btn-lg mt-5', onClick: this.entry },
                             'Entry'
                         )
                     ),
@@ -220,7 +252,7 @@ var Buttons = function (_React$Component4) {
                         { className: 'col-sm  text-center' },
                         React.createElement(
                             'button',
-                            { type: 'button', className: 'btn btn-primary btn-lg mt-5' },
+                            { type: 'button', className: 'btn btn-primary btn-lg mt-5', onClick: this.renewal },
                             'Renewal Date'
                         )
                     )
@@ -230,4 +262,58 @@ var Buttons = function (_React$Component4) {
     }]);
 
     return Buttons;
+}(React.Component);
+
+var EntryForm = function (_React$Component5) {
+    _inherits(EntryForm, _React$Component5);
+
+    function EntryForm(props) {
+        _classCallCheck(this, EntryForm);
+
+        return _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
+    }
+
+    _createClass(EntryForm, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { className: 'container' },
+                React.createElement(
+                    'h1',
+                    null,
+                    'Entry Form'
+                )
+            );
+        }
+    }]);
+
+    return EntryForm;
+}(React.Component);
+
+var RenewalForm = function (_React$Component6) {
+    _inherits(RenewalForm, _React$Component6);
+
+    function RenewalForm(props) {
+        _classCallCheck(this, RenewalForm);
+
+        return _possibleConstructorReturn(this, (RenewalForm.__proto__ || Object.getPrototypeOf(RenewalForm)).call(this, props));
+    }
+
+    _createClass(RenewalForm, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { className: 'container' },
+                React.createElement(
+                    'h1',
+                    null,
+                    'Reneal Form'
+                )
+            );
+        }
+    }]);
+
+    return RenewalForm;
 }(React.Component);
