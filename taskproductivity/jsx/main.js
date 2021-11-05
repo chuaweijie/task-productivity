@@ -22,7 +22,7 @@ class Main extends React.Component {
                         historyClass: "nav-link", 
                         tracking: <Tracking/>, 
                         history: null};
-        this.switchTracking
+        this.switchTracking()
     }
 
     switchTracking(e) {
@@ -36,7 +36,7 @@ class Main extends React.Component {
                 if (data.status == "no data") {
                     this.setState({trackingClass: "nav-link active", 
                                     historyClass: "nav-link", 
-                                    tracking: <button>Test</button>, 
+                                    tracking: <Buttons/>, 
                                     history: null});            
                 }
                 else if (data.status == "successful") {
@@ -120,17 +120,16 @@ class Buttons extends React.Component {
 
     render(){
         return (
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Entry</th>
-                        <th scope="col">Online Start</th>
-                        <th scope="col">Online End</th>
-                        <th scope="col">Renewal</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-            </table>
+            <div className="container">
+                <div className="row">
+                    <div className="col-sm  text-center">
+                        <button type="button" className="btn btn-secondary btn-lg mt-5">Entry</button>
+                    </div>
+                    <div className="col-sm  text-center">
+                        <button type="button" className="btn btn-primary btn-lg mt-5">Renewal Date</button>
+                    </div>
+                </div>
+            </div>
         );
     }
 }

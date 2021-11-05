@@ -30,8 +30,11 @@ var Main = function (_React$Component) {
 
         _this.switchTracking = _this.switchTracking.bind(_this);
         _this.switchHistory = _this.switchHistory.bind(_this);
-        _this.state = { trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null };
-        _this.switchTracking;
+        _this.state = { trackingClass: "nav-link active",
+            historyClass: "nav-link",
+            tracking: React.createElement(Tracking, null),
+            history: null };
+        _this.switchTracking();
         return _this;
     }
 
@@ -46,17 +49,16 @@ var Main = function (_React$Component) {
                 if (data.error) {
                     console.log(data.error);
                 } else {
-                    console.log(data);
-                    console.log(data.data);
-                    console.log(data.status);
                     if (data.status == "no data") {
-                        _this2.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(
-                                'button',
-                                null,
-                                'Test'
-                            ), history: null });
+                        _this2.setState({ trackingClass: "nav-link active",
+                            historyClass: "nav-link",
+                            tracking: React.createElement(Buttons, null),
+                            history: null });
                     } else if (data.status == "successful") {
-                        _this2.setState({ trackingClass: "nav-link active", historyClass: "nav-link", tracking: React.createElement(Tracking, null), history: null });
+                        _this2.setState({ trackingClass: "nav-link active",
+                            historyClass: "nav-link",
+                            tracking: React.createElement(Tracking, null),
+                            history: null });
                     }
                 }
             });
@@ -64,7 +66,10 @@ var Main = function (_React$Component) {
     }, {
         key: 'switchHistory',
         value: function switchHistory(e) {
-            this.setState({ trackingClass: "nav-link", historyClass: "nav-link active", tracking: null, history: React.createElement(History, null) });
+            this.setState({ trackingClass: "nav-link",
+                historyClass: "nav-link active",
+                tracking: null,
+                history: React.createElement(History, null) });
         }
     }, {
         key: 'render',
@@ -181,4 +186,48 @@ var History = function (_React$Component3) {
     }]);
 
     return History;
+}(React.Component);
+
+var Buttons = function (_React$Component4) {
+    _inherits(Buttons, _React$Component4);
+
+    function Buttons(props) {
+        _classCallCheck(this, Buttons);
+
+        return _possibleConstructorReturn(this, (Buttons.__proto__ || Object.getPrototypeOf(Buttons)).call(this, props));
+    }
+
+    _createClass(Buttons, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { className: 'container' },
+                React.createElement(
+                    'div',
+                    { className: 'row' },
+                    React.createElement(
+                        'div',
+                        { className: 'col-sm  text-center' },
+                        React.createElement(
+                            'button',
+                            { type: 'button', className: 'btn btn-secondary btn-lg mt-5' },
+                            'Entry'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'col-sm  text-center' },
+                        React.createElement(
+                            'button',
+                            { type: 'button', className: 'btn btn-primary btn-lg mt-5' },
+                            'Renewal Date'
+                        )
+                    )
+                )
+            );
+        }
+    }]);
+
+    return Buttons;
 }(React.Component);
