@@ -28,7 +28,8 @@ class Main extends React.Component {
         this.switchHistory = this.switchHistory.bind(this);
         this.entryHandler = this.entryHandler.bind(this);
         this.renewalHandler = this.renewalHandler.bind(this);
-        this.displayTrackingData = this.displayTrackingData(this);
+        this.displayTrackingData = this.displayTrackingData.bind(this);
+        this.displayButtons = this.displayButtons.bind(this);
         this.switchTracking();
     }
 
@@ -41,27 +42,28 @@ class Main extends React.Component {
             }
             else {
                 if (data.status == "no data") {
-                    this.setState({trackingClass: "nav-link active", 
-                                    historyClass: "nav-link", 
-                                    tracking: <Buttons entryHandler={this.entryHandler} renewalHandler={this.renewalHandler}/>, 
-                                    history: null});            
+                    this.displayButtons();
                 }
                 else if (data.status == "successful") {
-                    this.setState({trackingClass: "nav-link active", 
-                                    historyClass: "nav-link", 
-                                    tracking: <Tracking data={data.data}/>, 
-                                    history: null});
+                    this.displayTrackingData(data.data);
                 }
             }
         });
     }
 
-    displayTrackingData(data){
+    displayTrackingData(data) {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Tracking data={data}/>, 
+                        tracking: <Tracking data={data} showButtons={this.displayButtons} displayData={this.displayTrackingData}/>, 
                         history: null});
-}
+    }
+
+    displayButtons() {
+        this.setState({trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <Buttons entryHandler={this.entryHandler} renewalHandler={this.renewalHandler}/>, 
+                        history: null});            
+    }
 
     entryHandler(e) {
         this.setState({trackingClass: "nav-link active", 
@@ -108,9 +110,55 @@ class Main extends React.Component {
 class Tracking extends React.Component {
     constructor(props) {
         super(props);
+        this.deleteHandler = this.deleteHandler.bind(this);
+        this.departHandler = this.departHandler.bind(this);
+        this.reportHandler = this.reportHandler.bind(this);
+    }
+
+    deleteHandler(e) {
+        // TODO have a confirmation dialog before really deleting it. 
+        const id = e.target.dataset.id;
+        const csrftoken = getCookie('csrftoken');
+        fetch('/tracking', {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then(response => response.json())
+        .then(result =>{
+            if(result.error) {
+                console.log("Error");
+            }
+            else {
+                if (result.status == "successful") {
+                    this.props.showButtons()
+                }
+            }
+        });
+        
+    }
+
+    departHandler(e) {
+
+    }
+
+    reportHandler(e) {
+
     }
 
     render(){
+
+        const id = this.props.data.id
+        const entry = new Date(this.props.data.entry * 1000).toDateString();
+        const onlineStart = new Date(this.props.data.online_start * 1000).toDateString();
+        const onlineEnd = new Date(this.props.data.online_end * 1000).toDateString();
+        const renewal = new Date(this.props.data.renewal * 1000).toDateString();
+
         return (
             <div>
                 <div className="table-responsive">
@@ -125,16 +173,27 @@ class Tracking extends React.Component {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{this.props.data.entry}</td>
-                                <td>{this.props.data.online_start}</td>
-                                <td>{this.props.data.online_end}</td>
-                                <td>{this.props.data.renewal}</td>
+                                <td>{entry}</td>
+                                <td>{onlineStart}</td>
+                                <td>{onlineEnd}</td>
+                                <td>{renewal}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" className="btn btn-primary mt-3" id="btn_submit" data-id={this.props.data.id}>Report</button>
-                <button type="submit" className="btn btn-secondary mt-3" id="btn_cancel">Depart</button>
+                <div className="container">
+                    <div className="row">
+                        <div className="col-sm  text-center">
+                            <button type="submit" className="btn btn-danger mt-3" id="btn_delete" data-id={id} onClick={this.deleteHandler}>Delete</button>
+                        </div>
+                        <div className="col-sm  text-center">
+                            <button type="submit" className="btn btn-secondary mt-3" id="btn_depart" data-id={id} onClick={this.departHandler}>Depart</button>
+                        </div>
+                        <div className="col-sm  text-center">
+                            <button type="submit" className="btn btn-primary mt-3" id="btn_report" data-id={id} onClick={this.reportHandler}>Report</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -216,7 +275,7 @@ class EntryForm extends React.Component {
             }
             else {
                 if (result.status == "successful") {
-                    this.props.displayTrackingData(result.data);
+                    this.props.submitHandler(result.data);
                 }
             }
         });

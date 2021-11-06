@@ -43,7 +43,8 @@ var Main = function (_React$Component) {
             this.switchHistory = this.switchHistory.bind(this);
             this.entryHandler = this.entryHandler.bind(this);
             this.renewalHandler = this.renewalHandler.bind(this);
-            this.displayTrackingData = this.displayTrackingData(this);
+            this.displayTrackingData = this.displayTrackingData.bind(this);
+            this.displayButtons = this.displayButtons.bind(this);
             this.switchTracking();
         }
     }, {
@@ -58,15 +59,9 @@ var Main = function (_React$Component) {
                     console.log(data.error);
                 } else {
                     if (data.status == "no data") {
-                        _this2.setState({ trackingClass: "nav-link active",
-                            historyClass: "nav-link",
-                            tracking: React.createElement(Buttons, { entryHandler: _this2.entryHandler, renewalHandler: _this2.renewalHandler }),
-                            history: null });
+                        _this2.displayButtons();
                     } else if (data.status == "successful") {
-                        _this2.setState({ trackingClass: "nav-link active",
-                            historyClass: "nav-link",
-                            tracking: React.createElement(Tracking, { data: data.data }),
-                            history: null });
+                        _this2.displayTrackingData(data.data);
                     }
                 }
             });
@@ -76,7 +71,15 @@ var Main = function (_React$Component) {
         value: function displayTrackingData(data) {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(Tracking, { data: data }),
+                tracking: React.createElement(Tracking, { data: data, showButtons: this.displayButtons, displayData: this.displayTrackingData }),
+                history: null });
+        }
+    }, {
+        key: 'displayButtons',
+        value: function displayButtons() {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(Buttons, { entryHandler: this.entryHandler, renewalHandler: this.renewalHandler }),
                 history: null });
         }
     }, {
@@ -149,12 +152,58 @@ var Tracking = function (_React$Component2) {
     function Tracking(props) {
         _classCallCheck(this, Tracking);
 
-        return _possibleConstructorReturn(this, (Tracking.__proto__ || Object.getPrototypeOf(Tracking)).call(this, props));
+        var _this3 = _possibleConstructorReturn(this, (Tracking.__proto__ || Object.getPrototypeOf(Tracking)).call(this, props));
+
+        _this3.deleteHandler = _this3.deleteHandler.bind(_this3);
+        _this3.departHandler = _this3.departHandler.bind(_this3);
+        _this3.reportHandler = _this3.reportHandler.bind(_this3);
+        return _this3;
     }
 
     _createClass(Tracking, [{
+        key: 'deleteHandler',
+        value: function deleteHandler(e) {
+            var _this4 = this;
+
+            var id = e.target.dataset.id;
+            var csrftoken = getCookie('csrftoken');
+            fetch('/tracking', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (result) {
+                if (result.error) {
+                    console.log("Error");
+                } else {
+                    if (result.status == "successful") {
+                        _this4.props.showButtons();
+                    }
+                }
+            });
+        }
+    }, {
+        key: 'departHandler',
+        value: function departHandler(e) {}
+    }, {
+        key: 'reportHandler',
+        value: function reportHandler(e) {}
+    }, {
         key: 'render',
         value: function render() {
+
+            var id = this.props.data.id;
+            var entry = new Date(this.props.data.entry * 1000).toDateString();
+            var onlineStart = new Date(this.props.data.online_start * 1000).toDateString();
+            var onlineEnd = new Date(this.props.data.online_end * 1000).toDateString();
+            var renewal = new Date(this.props.data.renewal * 1000).toDateString();
+
             return React.createElement(
                 'div',
                 null,
@@ -201,36 +250,61 @@ var Tracking = function (_React$Component2) {
                                 React.createElement(
                                     'td',
                                     null,
-                                    this.props.data.entry
+                                    entry
                                 ),
                                 React.createElement(
                                     'td',
                                     null,
-                                    this.props.data.online_start
+                                    onlineStart
                                 ),
                                 React.createElement(
                                     'td',
                                     null,
-                                    this.props.data.online_end
+                                    onlineEnd
                                 ),
                                 React.createElement(
                                     'td',
                                     null,
-                                    this.props.data.renewal
+                                    renewal
                                 )
                             )
                         )
                     )
                 ),
                 React.createElement(
-                    'button',
-                    { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_submit', 'data-id': this.props.data.id },
-                    'Report'
-                ),
-                React.createElement(
-                    'button',
-                    { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_cancel' },
-                    'Depart'
+                    'div',
+                    { className: 'container' },
+                    React.createElement(
+                        'div',
+                        { className: 'row' },
+                        React.createElement(
+                            'div',
+                            { className: 'col-sm  text-center' },
+                            React.createElement(
+                                'button',
+                                { type: 'submit', className: 'btn btn-danger mt-3', id: 'btn_delete', 'data-id': id, onClick: this.deleteHandler },
+                                'Delete'
+                            )
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'col-sm  text-center' },
+                            React.createElement(
+                                'button',
+                                { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_depart', 'data-id': id, onClick: this.departHandler },
+                                'Depart'
+                            )
+                        ),
+                        React.createElement(
+                            'div',
+                            { className: 'col-sm  text-center' },
+                            React.createElement(
+                                'button',
+                                { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_report', 'data-id': id, onClick: this.reportHandler },
+                                'Report'
+                            )
+                        )
+                    )
                 )
             );
         }
@@ -271,11 +345,11 @@ var Buttons = function (_React$Component4) {
     function Buttons(props) {
         _classCallCheck(this, Buttons);
 
-        var _this5 = _possibleConstructorReturn(this, (Buttons.__proto__ || Object.getPrototypeOf(Buttons)).call(this, props));
+        var _this6 = _possibleConstructorReturn(this, (Buttons.__proto__ || Object.getPrototypeOf(Buttons)).call(this, props));
 
-        _this5.entry = _this5.entry.bind(_this5);
-        _this5.renewal = _this5.renewal.bind(_this5);
-        return _this5;
+        _this6.entry = _this6.entry.bind(_this6);
+        _this6.renewal = _this6.renewal.bind(_this6);
+        return _this6;
     }
 
     _createClass(Buttons, [{
@@ -329,19 +403,19 @@ var EntryForm = function (_React$Component5) {
     function EntryForm(props) {
         _classCallCheck(this, EntryForm);
 
-        var _this6 = _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
+        var _this7 = _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
 
-        _this6.submit = _this6.submit.bind(_this6);
-        _this6.cancel = _this6.cancel.bind(_this6);
-        _this6.checkDate = _this6.checkDate.bind(_this6);
-        _this6.state = { submitDisabled: true };
-        return _this6;
+        _this7.submit = _this7.submit.bind(_this7);
+        _this7.cancel = _this7.cancel.bind(_this7);
+        _this7.checkDate = _this7.checkDate.bind(_this7);
+        _this7.state = { submitDisabled: true };
+        return _this7;
     }
 
     _createClass(EntryForm, [{
         key: 'submit',
         value: function submit(e) {
-            var _this7 = this;
+            var _this8 = this;
 
             var date = Date.parse(document.querySelector("#dateEntry").value) / 1000;
             console.log(date);
@@ -363,7 +437,7 @@ var EntryForm = function (_React$Component5) {
                     console.log("Error");
                 } else {
                     if (result.status == "successful") {
-                        _this7.props.displayTrackingData(result.data);
+                        _this8.props.submitHandler(result.data);
                     }
                 }
             });

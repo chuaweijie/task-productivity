@@ -282,8 +282,6 @@ def tracking(request):
             return new_renewal_date(renewal, request.user)
 
         elif mode == "entry":
-            print(data)
-            print(data.get("entry"))
             entry = datetime.fromtimestamp(int(data.get("entry")))
             renewal = entry + timedelta(days=90)
             online_start = renewal - timedelta(days=14)
