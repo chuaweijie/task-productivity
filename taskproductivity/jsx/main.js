@@ -144,7 +144,29 @@ class Tracking extends React.Component {
     }
 
     departHandler(e) {
-
+        const csrftoken = getCookie('csrftoken');
+        fetch('/tracking', {
+            method: 'PUT',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mode: "departure",
+                entry: date
+            })
+        })
+        .then(response => response.json())
+        .then(result =>{
+            if(result.error) {
+                console.log("Error");
+            }
+            else {
+                if (result.status == "successful") {
+                    this.props.submitHandler(result.data);
+                }
+            }
+        });
     }
 
     reportHandler(e) {
@@ -255,7 +277,6 @@ class EntryForm extends React.Component {
 
     submit(e) {
         const date = Date.parse(document.querySelector("#dateEntry").value) / 1000;
-        console.log(date);
         const csrftoken = getCookie('csrftoken');
         fetch('/tracking', {
             method: 'POST',
@@ -322,6 +343,34 @@ class EntryForm extends React.Component {
 }
 
 class RenewalForm extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="container">
+               <h1>Reneal Form</h1>
+            </div>
+        );
+    }
+}
+
+class DepartureForm extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="container">
+               <h1>Reneal Form</h1>
+            </div>
+        );
+    }
+}
+
+class ReportForm extends React.Component {
     constructor(props) {
         super(props);
     }
