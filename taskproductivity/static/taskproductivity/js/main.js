@@ -1,5 +1,3 @@
-'use strict';
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -7,6 +5,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+import { getCookie } from './helpers.js';
+'use strict';
 
 document.addEventListener('DOMContentLoaded', function () {
     var div_main = document.querySelector("#div_main_ui");
@@ -28,21 +29,26 @@ var Main = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
 
-        _this.switchTracking = _this.switchTracking.bind(_this);
-        _this.switchHistory = _this.switchHistory.bind(_this);
-        _this.entryHandler = _this.entryHandler.bind(_this);
-        _this.renewalHandler = _this.renewalHandler.bind(_this);
         _this.state = { trackingClass: "nav-link active",
             historyClass: "nav-link",
-            tracking: React.createElement(Tracking, null),
+            tracking: null,
             history: null };
-        _this.switchTracking();
         return _this;
     }
 
     _createClass(Main, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.switchTracking = this.switchTracking.bind(this);
+            this.switchHistory = this.switchHistory.bind(this);
+            this.entryHandler = this.entryHandler.bind(this);
+            this.renewalHandler = this.renewalHandler.bind(this);
+            this.displayTrackingData = this.displayTrackingData(this);
+            this.switchTracking();
+        }
+    }, {
         key: 'switchTracking',
-        value: function switchTracking(e) {
+        value: function switchTracking() {
             var _this2 = this;
 
             fetch('/tracking').then(function (response) {
@@ -59,18 +65,26 @@ var Main = function (_React$Component) {
                     } else if (data.status == "successful") {
                         _this2.setState({ trackingClass: "nav-link active",
                             historyClass: "nav-link",
-                            tracking: React.createElement(Tracking, null),
+                            tracking: React.createElement(Tracking, { data: data.data }),
                             history: null });
                     }
                 }
             });
         }
     }, {
+        key: 'displayTrackingData',
+        value: function displayTrackingData(data) {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(Tracking, { data: data }),
+                history: null });
+        }
+    }, {
         key: 'entryHandler',
         value: function entryHandler(e) {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(EntryForm, null),
+                tracking: React.createElement(EntryForm, { submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
                 history: null });
         }
     }, {
@@ -78,7 +92,7 @@ var Main = function (_React$Component) {
         value: function renewalHandler(e) {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(RenewalForm, null),
+                tracking: React.createElement(RenewalForm, { cancelHandler: this.switchTracking }),
                 history: null });
         }
     }, {
@@ -142,36 +156,81 @@ var Tracking = function (_React$Component2) {
         key: 'render',
         value: function render() {
             return React.createElement(
-                'table',
-                { className: 'table' },
+                'div',
+                null,
                 React.createElement(
-                    'thead',
-                    null,
+                    'div',
+                    { className: 'table-responsive' },
                     React.createElement(
-                        'tr',
-                        null,
+                        'table',
+                        { className: 'table' },
                         React.createElement(
-                            'th',
-                            { scope: 'col' },
-                            'Entry'
+                            'thead',
+                            null,
+                            React.createElement(
+                                'tr',
+                                null,
+                                React.createElement(
+                                    'th',
+                                    { scope: 'col' },
+                                    'Entry'
+                                ),
+                                React.createElement(
+                                    'th',
+                                    { scope: 'col' },
+                                    'Online Start'
+                                ),
+                                React.createElement(
+                                    'th',
+                                    { scope: 'col' },
+                                    'Online End'
+                                ),
+                                React.createElement(
+                                    'th',
+                                    { scope: 'col' },
+                                    'Renewal'
+                                )
+                            )
                         ),
                         React.createElement(
-                            'th',
-                            { scope: 'col' },
-                            'Online Start'
-                        ),
-                        React.createElement(
-                            'th',
-                            { scope: 'col' },
-                            'Online End'
-                        ),
-                        React.createElement(
-                            'th',
-                            { scope: 'col' },
-                            'Renewal'
-                        ),
-                        React.createElement('th', { scope: 'col' })
+                            'tbody',
+                            null,
+                            React.createElement(
+                                'tr',
+                                null,
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    this.props.data.entry
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    this.props.data.online_start
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    this.props.data.online_end
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    this.props.data.renewal
+                                )
+                            )
+                        )
                     )
+                ),
+                React.createElement(
+                    'button',
+                    { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_submit', 'data-id': this.props.data.id },
+                    'Report'
+                ),
+                React.createElement(
+                    'button',
+                    { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_cancel' },
+                    'Depart'
                 )
             );
         }
@@ -243,7 +302,7 @@ var Buttons = function (_React$Component4) {
                         { className: 'col-sm  text-center' },
                         React.createElement(
                             'button',
-                            { type: 'button', className: 'btn btn-secondary btn-lg mt-5', onClick: this.entry },
+                            { type: 'button', id: 'btn_entry', name: 'btn_entry', className: 'btn btn-secondary btn-lg mt-5', onClick: this.entry },
                             'Entry'
                         )
                     ),
@@ -252,7 +311,7 @@ var Buttons = function (_React$Component4) {
                         { className: 'col-sm  text-center' },
                         React.createElement(
                             'button',
-                            { type: 'button', className: 'btn btn-primary btn-lg mt-5', onClick: this.renewal },
+                            { type: 'button', id: 'btn_renewal', name: 'btn_renewal', className: 'btn btn-primary btn-lg mt-5', onClick: this.renewal },
                             'Renewal Date'
                         )
                     )
@@ -270,19 +329,111 @@ var EntryForm = function (_React$Component5) {
     function EntryForm(props) {
         _classCallCheck(this, EntryForm);
 
-        return _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
+        var _this6 = _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
+
+        _this6.submit = _this6.submit.bind(_this6);
+        _this6.cancel = _this6.cancel.bind(_this6);
+        _this6.checkDate = _this6.checkDate.bind(_this6);
+        _this6.state = { submitDisabled: true };
+        return _this6;
     }
 
     _createClass(EntryForm, [{
+        key: 'submit',
+        value: function submit(e) {
+            var _this7 = this;
+
+            var date = Date.parse(document.querySelector("#dateEntry").value) / 1000;
+            console.log(date);
+            var csrftoken = getCookie('csrftoken');
+            fetch('/tracking', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: "entry",
+                    entry: date
+                })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (result) {
+                if (result.error) {
+                    console.log("Error");
+                } else {
+                    if (result.status == "successful") {
+                        _this7.props.displayTrackingData(result.data);
+                    }
+                }
+            });
+        }
+    }, {
+        key: 'cancel',
+        value: function cancel(e) {
+            this.props.cancelHandler(e);
+        }
+    }, {
+        key: 'checkDate',
+        value: function checkDate(e) {
+            console.log(e.target.value);
+            console.log(e.target.value.length);
+            if (e.target.value.length > 0) {
+                this.setState({ submitDisabled: false });
+            } else {
+                this.setState({ submitDisabled: true });
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             return React.createElement(
                 'div',
                 { className: 'container' },
                 React.createElement(
-                    'h1',
+                    'form',
                     null,
-                    'Entry Form'
+                    React.createElement(
+                        'div',
+                        { className: 'form-group mt-4' },
+                        React.createElement(
+                            'label',
+                            { htmlFor: 'inputEntry' },
+                            'Entry Date'
+                        ),
+                        React.createElement('input', { type: 'date', className: 'form-control', id: 'dateEntry', 'aria-describedby': 'dateHelp', placeholder: 'Enter date', onChange: this.checkDate }),
+                        React.createElement(
+                            'small',
+                            { id: 'dateHelp', className: 'form-text text-muted' },
+                            'The data that you\'ve entered Thailand'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'container mt-4' },
+                        React.createElement(
+                            'div',
+                            { className: 'row' },
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm  text-center' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_submit', disabled: this.state.submitDisabled, onClick: this.submit },
+                                    'Submit'
+                                )
+                            ),
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm  text-center' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_cancel', onClick: this.cancel },
+                                    'Cancel'
+                                )
+                            )
+                        )
+                    )
                 )
             );
         }

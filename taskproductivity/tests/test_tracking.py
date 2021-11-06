@@ -4,6 +4,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .base_case import ViewBaseCase, UIBaseCase
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 from datetime import datetime, timedelta
 
@@ -297,7 +298,7 @@ class UITestCase(UIBaseCase):
 
         date_renewal = self.web_driver.find_element_by_id(btn)
         date_renewal.click()
-        date_renewal.send_keys(date)
+        date_renewal.send_keys(date, Keys.TAB, "2021")
 
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         btn_submit.click()
@@ -334,7 +335,7 @@ class UITestCase(UIBaseCase):
         # TODO: I suspect I will need to add test cases to test if the tab is active or not. 
 
         # Test adding renewal.
-        self._renew("04052021")
+        self._renew("0405")
 
         # Renewal: Check the page render after the renewal adding has been added successfully. 
         self._check_tracking_elements_with_record("-", "20 April 2021", "27 April 2021", "4 May 2021")
@@ -346,7 +347,7 @@ class UITestCase(UIBaseCase):
         btn_cancel = self.web_driver.find_element_by_id("btn_cancel")
         btn_cancel.click()
 
-        self._renew("04062021")
+        self._renew("0406")
 
         # Reported: Check the page render after the renewal adding has been added successfully. 
         self._check_tracking_elements_with_record("-", "21 May 2021", "28 May 2021", "4 June 2021")
@@ -363,7 +364,7 @@ class UITestCase(UIBaseCase):
 
         self._check_tracking_elements_blank()
         
-        self._renew("04072021")
+        self._renew("0407")
         self._check_tracking_elements_with_record("-", "20 June 2021", "27 June 2021", "4 July 2021")
 
         # Test departure
@@ -372,7 +373,7 @@ class UITestCase(UIBaseCase):
 
         date_depart = self.web_driver.find_element_by_id("date_depart")
         date_depart.click()
-        date_depart.send_keys("15072021")
+        date_depart.send_keys("1507", Keys.TAB ,"2021")
 
         self._check_tracking_elements_blank()
         
@@ -402,14 +403,14 @@ class UITestCase(UIBaseCase):
         btn_entry.click()
         date_depart = self.web_driver.find_element_by_id("date_entry")
         date_depart.click()
-        date_depart.send_keys("04082021")
+        date_depart.send_keys("0408", Keys.TAB, "2021")
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         btn_submit.click()
 
         self._check_tracking_elements_with_record("4 August 2021", "21 August 2021", "28 August 2021", "3 September 2021")
 
         # Test marking as reported to check history
-        self._renew("31082021", "btn_report")
+        self._renew("3108", "btn_report")
         data = [{   "id": 1,
                     "entry": "-", 
                     "renewal": "4 May 2021", 
