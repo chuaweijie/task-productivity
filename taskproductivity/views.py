@@ -358,7 +358,7 @@ def history(request):
                 ERDates.objects.get(user=request.user.id, active=True)
             except ObjectDoesNotExist:
                 ERDates.objects.filter(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
-                tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
+                tracking_history = ERDates.objects.filter(user=request.user.id, active=False).order_by('-id')
                 data = [entry.serialize() for entry in tracking_history]
                 return JsonResponse({"status": "successful",
                                     "data": data

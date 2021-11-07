@@ -261,7 +261,6 @@ class History extends React.Component {
     undoHandler(e) {
         const id = e.target.dataset.id;
         const csrftoken = getCookie('csrftoken');
-        console.log("in undoHandler")
         fetch('/history', {
             method: 'PUT',
             headers: {
@@ -290,7 +289,6 @@ class History extends React.Component {
     packData(data) {
         const rows = [];
         let createButton = true;
-        console.log(data);
         data.forEach((row) => {
             let button = "-";
             if (createButton) {
@@ -441,8 +439,6 @@ class Form extends React.Component {
             });
         }
         else if (this.props.mode == "renewal") {
-            console.log("in renwal if")
-            console.log(date)
             fetch('/tracking', {
                 method: 'POST',
                 headers: {
@@ -538,8 +534,6 @@ class Form extends React.Component {
     }
 
     checkDate(e) {
-        console.log(e.target.value);
-        console.log(e.target.value.length);
         if (e.target.value.length > 0) {
             this.setState({submitDisabled: false});
         }
