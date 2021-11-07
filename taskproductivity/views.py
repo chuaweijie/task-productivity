@@ -346,7 +346,7 @@ def history(request):
     if request.content_type == "application/json":
         data = json.loads(request.body)
     if request.method == "GET":
-        tracking_history = ERDates.objects.filter(user=request.user.id, active=False)
+        tracking_history = ERDates.objects.filter(user=request.user.id, active=False).order_by('-id')
         data = [entry.serialize() for entry in tracking_history]
         return JsonResponse({"status": "successful",
                             "data": data

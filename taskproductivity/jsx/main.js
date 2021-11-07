@@ -31,6 +31,7 @@ class Main extends React.Component {
         this.departureHandler = this.departureHandler.bind(this);
         this.reportedHandler = this.reportedHandler.bind(this);
         this.displayTrackingData = this.displayTrackingData.bind(this);
+        this.displayHistoryData = this.displayHistoryData.bind(this);
         this.displayButtons = this.displayButtons.bind(this);
         this.switchTracking();
     }
@@ -53,11 +54,37 @@ class Main extends React.Component {
         });
     }
 
+    switchHistory() {
+        fetch(`/history`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error)  {
+                console.log(data.error);
+            }
+            else {
+                if (data.status == "no data") {
+                    this.displayButtons();
+                }
+                else if (data.status == "successful") {
+                    this.displayHistoryData(data.data);
+                }
+            }
+        });
+        
+    }
+
     displayTrackingData(data) {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Tracking data={data} showButtons={this.displayButtons} displayData={this.displayTrackingData} showDepartureForm={this.departureHandler} showReportForm={this.reportedHandler}/>, 
+                        tracking: <Tracking data={data} showButtons={this.displayButtons} showDepartureForm={this.departureHandler} showReportForm={this.reportedHandler}/>, 
                         history: null});
+    }
+
+    displayHistoryData(data) {
+        this.setState({trackingClass: "nav-link", 
+                        historyClass: "nav-link active", 
+                        tracking: null, 
+                        history: <History data={data} submitHandler={this.displayHistoryData}/>});
     }
 
     displayButtons() {
@@ -67,39 +94,32 @@ class Main extends React.Component {
                         history: null});            
     }
 
-    entryHandler() {
+    entryHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Form mode="entry" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="entry" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking} recordId={id}/>, 
                         history: null});            
     }
 
-    renewalHandler() {
+    renewalHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Form mode="renewal" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="renewal" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking} recordId={id}/>, 
                         history: null});
     }
 
-    departureHandler() {
+    departureHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Form mode="departure" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="departure" submitHandler={this.displayButtons}  cancelHandler={this.switchTracking} recordId={id}/>, 
                         history: null});
     }
 
-    reportedHandler() {
+    reportedHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Form mode="reported" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="reported" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking} recordId={id}/>, 
                         history: null});
-    }
-
-    switchHistory() {
-        this.setState({trackingClass: "nav-link", 
-                        historyClass: "nav-link active", 
-                        tracking: null, 
-                        history: <History/>});
     }
 
     render() {
@@ -160,20 +180,36 @@ class Tracking extends React.Component {
     }
 
     departHandler(e) {
-        this.props.showDepartureForm();
+        const id = e.target.dataset.id;
+        this.props.showDepartureForm(id);
     }
 
     reportHandler(e) {
-        this.props.showReportForm();
+        const id = e.target.dataset.id;
+        this.props.showReportForm(id);
     }
 
     render(){
 
         const id = this.props.data.id
-        const entry = new Date(this.props.data.entry * 1000).toDateString();
-        const onlineStart = new Date(this.props.data.online_start * 1000).toDateString();
-        const onlineEnd = new Date(this.props.data.online_end * 1000).toDateString();
-        const renewal = new Date(this.props.data.renewal * 1000).toDateString();
+        let entry = '-';
+        let onlineStart = '-';
+        let onlineEnd = '-';
+        let renewal = '-';
+        if (this.props.data.entry !== null) {
+            entry = new Date(this.props.data.entry * 1000).toDateString();
+        }
+        if (this.props.data.onlineStart !== null) {
+            onlineStart = new Date(this.props.data.online_start * 1000).toDateString();
+        }
+
+        if (this.props.data.onlineEnd !== null) {
+            onlineEnd = new Date(this.props.data.online_end * 1000).toDateString();
+        }
+        
+        if (this.props.data.renewal !== null) {
+            renewal = new Date(this.props.data.renewal * 1000).toDateString();
+        }
 
         return (
             <div>
@@ -219,11 +255,116 @@ class Tracking extends React.Component {
 class History extends React.Component {
     constructor(props) {
         super(props);
+        this.undoHandler = this.undoHandler.bind(this);
+    }
+
+    undoHandler(e) {
+        const id = e.target.dataset.id;
+        const csrftoken = getCookie('csrftoken');
+        console.log("in undoHandler")
+        fetch('/history', {
+            method: 'PUT',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mode: "undo",
+                id: id,
+            })
+        })
+        .then(response => response.json())
+        .then(result =>{
+            if(result.error) {
+                console.log("Error");
+            }
+            else {
+                if (result.status == "successful") {
+                    this.props.submitHandler(result.data);
+                }
+            }
+        });
+        
+    }
+
+    packData(data) {
+        const rows = [];
+        let createButton = true;
+        console.log(data);
+        data.forEach((row) => {
+            let button = "-";
+            if (createButton) {
+                button = <button type="submit" className="btn btn-primary" id="btn_undo" data-id={row.id} onClick={this.undoHandler}>Undo</button>;
+                createButton = false;
+            }
+            let entry = "-";
+            let onlineStart = "-";
+            let onlineEnd = "-";
+            let renewal = "-";
+            let departure = "-";
+            let reportedDate = "-";
+
+            if (row.entry  !== null) {
+                entry = new Date(row.entry * 1000).toDateString();
+            }
+
+            if (row.online_start  !== null) {
+                onlineStart = new Date(row.online_start * 1000).toDateString();
+            }
+
+            if (row.online_end !== null) {
+                onlineEnd = new Date(row.online_end * 1000).toDateString();
+            }
+
+            if (row.renewal !== null) {
+                renewal = new Date(row.renewal * 1000).toDateString();
+            }
+            
+            if (row.departure !== null ) {
+                departure = new Date(row.departure * 1000).toDateString();
+            }
+
+            if (row.reported_date !== null) {
+                reportedDate = new Date(row.reported_date * 1000).toDateString();
+            }
+            rows.push(
+                <tr key={row.id}>
+                    <td>{button}</td>
+                    <td>{entry}</td>
+                    <td>{onlineStart}</td>
+                    <td>{onlineEnd}</td>
+                    <td>{renewal}</td>
+                    <td>{departure}</td>
+                    <td>{reportedDate}</td>
+                </tr>
+            );
+        });
+        return rows;
     }
 
     render(){
+
+        const rows = this.packData(this.props.data);
+
         return (
-            <h1>History</h1>
+            <div className="table-responsive">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Entry</th>
+                            <th scope="col">Online Start</th>
+                            <th scope="col">Online End</th>
+                            <th scope="col">Renewal Date</th>
+                            <th scope="col">Departure Date</th>
+                            <th scope="col">Reported Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {rows}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 }
@@ -300,6 +441,8 @@ class Form extends React.Component {
             });
         }
         else if (this.props.mode == "renewal") {
+            console.log("in renwal if")
+            console.log(date)
             fetch('/tracking', {
                 method: 'POST',
                 headers: {
@@ -308,7 +451,7 @@ class Form extends React.Component {
                 },
                 body: JSON.stringify({
                     mode: "renewal",
-                    entry: date
+                    renewal: date
                 })
             })
             .then(response => response.json())
@@ -323,6 +466,70 @@ class Form extends React.Component {
                     }
                 }
             });
+        }
+        else if (this.props.mode == "departure") {
+            const id = e.target.dataset.id;
+            if (id == "null") {
+                console.log("Error: id is null.");
+            }
+            else {
+                fetch('/tracking', {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: "departure",
+                        id: id,
+                        date: date
+                    })
+                })
+                .then(response => response.json())
+                .then(result =>{
+                    if(result.error) {
+                        console.log("Error");
+                        this.setState({submitDisabled: false});
+                    }
+                    else {
+                        if (result.status == "successful") {
+                            this.props.submitHandler(result.data);
+                        }
+                    }
+                });
+            }
+        }
+        else if (this.props.mode == "reported") {
+            const id = e.target.dataset.id;
+            if (id == "null") {
+                console.log("Error: id is null.");
+            }
+            else {
+                fetch('/tracking', {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: "reported",
+                        id: id,
+                        reported_date: date
+                    })
+                })
+                .then(response => response.json())
+                .then(result =>{
+                    if(result.error) {
+                        console.log("Error");
+                        this.setState({submitDisabled: false});
+                    }
+                    else {
+                        if (result.status == "successful") {
+                            this.props.submitHandler(result.data);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -345,6 +552,7 @@ class Form extends React.Component {
         
         let label = "";
         let labelHelp = "";
+        const id = this.props.recordId;
         
         if (this.props.mode == "renewal") {
             label = "Renewal Date";
@@ -375,7 +583,7 @@ class Form extends React.Component {
                     <div className="container mt-4">
                         <div className="row">
                             <div className="col-sm  text-center">
-                                <button type="submit" className="btn btn-primary mt-3" id="btn_submit" disabled={this.state.submitDisabled} onClick={this.submit}>Submit</button>
+                                <button type="submit" className="btn btn-primary mt-3" id="btn_submit" data-id={id} disabled={this.state.submitDisabled} onClick={this.submit}>Submit</button>
                             </div>
                             <div className="col-sm  text-center">
                                 <button type="submit" className="btn btn-secondary mt-3" id="btn_cancel" onClick={this.cancel}>Cancel</button>
