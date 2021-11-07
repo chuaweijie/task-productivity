@@ -28,6 +28,8 @@ class Main extends React.Component {
         this.switchHistory = this.switchHistory.bind(this);
         this.entryHandler = this.entryHandler.bind(this);
         this.renewalHandler = this.renewalHandler.bind(this);
+        this.departureHandler = this.departureHandler.bind(this);
+        this.reportedHandler = this.reportedHandler.bind(this);
         this.displayTrackingData = this.displayTrackingData.bind(this);
         this.displayButtons = this.displayButtons.bind(this);
         this.switchTracking();
@@ -54,7 +56,7 @@ class Main extends React.Component {
     displayTrackingData(data) {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <Tracking data={data} showButtons={this.displayButtons} displayData={this.displayTrackingData}/>, 
+                        tracking: <Tracking data={data} showButtons={this.displayButtons} displayData={this.displayTrackingData} showDepartureForm={this.departureHandler} showReportForm={this.reportedHandler}/>, 
                         history: null});
     }
 
@@ -65,21 +67,35 @@ class Main extends React.Component {
                         history: null});            
     }
 
-    entryHandler(e) {
+    entryHandler() {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <EntryForm submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="entry" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
                         history: null});            
     }
 
-    renewalHandler(e) {
+    renewalHandler() {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
-                        tracking: <RenewalForm cancelHandler={this.switchTracking}/>, 
+                        tracking: <Form mode="renewal" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
                         history: null});
     }
 
-    switchHistory(e) {
+    departureHandler() {
+        this.setState({trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <Form mode="departure" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        history: null});
+    }
+
+    reportedHandler() {
+        this.setState({trackingClass: "nav-link active", 
+                        historyClass: "nav-link", 
+                        tracking: <Form mode="reported" submitHandler={this.displayTrackingData} cancelHandler={this.switchTracking}/>, 
+                        history: null});
+    }
+
+    switchHistory() {
         this.setState({trackingClass: "nav-link", 
                         historyClass: "nav-link active", 
                         tracking: null, 
@@ -136,7 +152,7 @@ class Tracking extends React.Component {
             }
             else {
                 if (result.status == "successful") {
-                    this.props.showButtons()
+                    this.props.showButtons();
                 }
             }
         });
@@ -144,33 +160,11 @@ class Tracking extends React.Component {
     }
 
     departHandler(e) {
-        const csrftoken = getCookie('csrftoken');
-        fetch('/tracking', {
-            method: 'PUT',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                mode: "departure",
-                entry: date
-            })
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if(result.error) {
-                console.log("Error");
-            }
-            else {
-                if (result.status == "successful") {
-                    this.props.submitHandler(result.data);
-                }
-            }
-        });
+        this.props.showDepartureForm();
     }
 
     reportHandler(e) {
-
+        this.props.showReportForm();
     }
 
     render(){
@@ -242,12 +236,12 @@ class Buttons extends React.Component {
         this.renewal = this.renewal.bind(this);
     }
 
-    entry(e) {
-        this.props.entryHandler(e);
+    entry() {
+        this.props.entryHandler();
     }
 
-    renewal(e) {
-        this.props.renewalHandler(e);
+    renewal() {
+        this.props.renewalHandler();
     }
 
     render() {
@@ -266,7 +260,7 @@ class Buttons extends React.Component {
     }
 }
 
-class EntryForm extends React.Component {
+class Form extends React.Component {
     constructor(props) {
         super(props);
         this.submit = this.submit.bind(this);
@@ -276,34 +270,64 @@ class EntryForm extends React.Component {
     }
 
     submit(e) {
+        this.setState({submitDisabled: true});
         const date = Date.parse(document.querySelector("#dateEntry").value) / 1000;
         const csrftoken = getCookie('csrftoken');
-        fetch('/tracking', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                mode: "entry",
-                entry: date
+
+        if (this.props.mode == "entry") {
+            fetch('/tracking', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: "entry",
+                    entry: date
+                })
             })
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if(result.error) {
-                console.log("Error");
-            }
-            else {
-                if (result.status == "successful") {
-                    this.props.submitHandler(result.data);
+            .then(response => response.json())
+            .then(result =>{
+                if(result.error) {
+                    console.log("Error");
+                    this.setState({submitDisabled: false});
                 }
-            }
-        });
+                else {
+                    if (result.status == "successful") {
+                        this.props.submitHandler(result.data);
+                    }
+                }
+            });
+        }
+        else if (this.props.mode == "renewal") {
+            fetch('/tracking', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: "renewal",
+                    entry: date
+                })
+            })
+            .then(response => response.json())
+            .then(result =>{
+                if(result.error) {
+                    console.log("Error");
+                    this.setState({submitDisabled: false});
+                }
+                else {
+                    if (result.status == "successful") {
+                        this.props.submitHandler(result.data);
+                    }
+                }
+            });
+        }
     }
 
-    cancel(e) {
-        this.props.cancelHandler(e);
+    cancel() {
+        this.props.cancelHandler();
     }
 
     checkDate(e) {
@@ -318,13 +342,35 @@ class EntryForm extends React.Component {
     }
 
     render() {
+        
+        let label = "";
+        let labelHelp = "";
+        
+        if (this.props.mode == "renewal") {
+            label = "Renewal Date";
+            labelHelp = "The date that you will need to give your 90 days notification";
+        }
+        else if (this.props.mode == "entry") {
+            label = "Entry Date";
+            labelHelp = "The date that you've entered Thailand";
+        }
+        else if (this.props.mode == "departure") {
+            label = "Departure Date";
+            labelHelp = "The date that you left Thailand";
+        }
+        else if (this.props.mode == "reported") {
+            label = "Entry Date";
+            labelHelp = "The date that you've given your 90 days notification";
+        }
+
+
         return (
             <div className="container">
                 <form>
                     <div className="form-group mt-4">
-                        <label htmlFor="inputEntry">Entry Date</label>
+                        <label htmlFor="inputEntry">{label}</label>
                         <input type="date" className="form-control" id="dateEntry" aria-describedby="dateHelp" placeholder="Enter date" onChange={this.checkDate}/>
-                        <small id="dateHelp" className="form-text text-muted">The data that you've entered Thailand</small>
+                        <small id="dateHelp" className="form-text text-muted">{labelHelp}</small>
                     </div>
                     <div className="container mt-4">
                         <div className="row">
@@ -337,48 +383,6 @@ class EntryForm extends React.Component {
                         </div>
                     </div>
                 </form>
-            </div>
-        );
-    }
-}
-
-class RenewalForm extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div className="container">
-               <h1>Reneal Form</h1>
-            </div>
-        );
-    }
-}
-
-class DepartureForm extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div className="container">
-               <h1>Reneal Form</h1>
-            </div>
-        );
-    }
-}
-
-class ReportForm extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div className="container">
-               <h1>Reneal Form</h1>
             </div>
         );
     }

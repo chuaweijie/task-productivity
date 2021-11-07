@@ -43,6 +43,8 @@ var Main = function (_React$Component) {
             this.switchHistory = this.switchHistory.bind(this);
             this.entryHandler = this.entryHandler.bind(this);
             this.renewalHandler = this.renewalHandler.bind(this);
+            this.departureHandler = this.departureHandler.bind(this);
+            this.reportedHandler = this.reportedHandler.bind(this);
             this.displayTrackingData = this.displayTrackingData.bind(this);
             this.displayButtons = this.displayButtons.bind(this);
             this.switchTracking();
@@ -71,7 +73,7 @@ var Main = function (_React$Component) {
         value: function displayTrackingData(data) {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(Tracking, { data: data, showButtons: this.displayButtons, displayData: this.displayTrackingData }),
+                tracking: React.createElement(Tracking, { data: data, showButtons: this.displayButtons, displayData: this.displayTrackingData, showDepartureForm: this.departureHandler, showReportForm: this.reportedHandler }),
                 history: null });
         }
     }, {
@@ -84,23 +86,39 @@ var Main = function (_React$Component) {
         }
     }, {
         key: 'entryHandler',
-        value: function entryHandler(e) {
+        value: function entryHandler() {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(EntryForm, { submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
+                tracking: React.createElement(Form, { mode: 'entry', submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
                 history: null });
         }
     }, {
         key: 'renewalHandler',
-        value: function renewalHandler(e) {
+        value: function renewalHandler() {
             this.setState({ trackingClass: "nav-link active",
                 historyClass: "nav-link",
-                tracking: React.createElement(RenewalForm, { cancelHandler: this.switchTracking }),
+                tracking: React.createElement(Form, { mode: 'renewal', submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
+                history: null });
+        }
+    }, {
+        key: 'departureHandler',
+        value: function departureHandler() {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(Form, { mode: 'departure', submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
+                history: null });
+        }
+    }, {
+        key: 'reportedHandler',
+        value: function reportedHandler() {
+            this.setState({ trackingClass: "nav-link active",
+                historyClass: "nav-link",
+                tracking: React.createElement(Form, { mode: 'reported', submitHandler: this.displayTrackingData, cancelHandler: this.switchTracking }),
                 history: null });
         }
     }, {
         key: 'switchHistory',
-        value: function switchHistory(e) {
+        value: function switchHistory() {
             this.setState({ trackingClass: "nav-link",
                 historyClass: "nav-link active",
                 tracking: null,
@@ -165,6 +183,7 @@ var Tracking = function (_React$Component2) {
         value: function deleteHandler(e) {
             var _this4 = this;
 
+            // TODO have a confirmation dialog before really deleting it. 
             var id = e.target.dataset.id;
             var csrftoken = getCookie('csrftoken');
             fetch('/tracking', {
@@ -190,10 +209,14 @@ var Tracking = function (_React$Component2) {
         }
     }, {
         key: 'departHandler',
-        value: function departHandler(e) {}
+        value: function departHandler(e) {
+            this.props.showDepartureForm();
+        }
     }, {
         key: 'reportHandler',
-        value: function reportHandler(e) {}
+        value: function reportHandler(e) {
+            this.props.showReportForm();
+        }
     }, {
         key: 'render',
         value: function render() {
@@ -354,13 +377,13 @@ var Buttons = function (_React$Component4) {
 
     _createClass(Buttons, [{
         key: 'entry',
-        value: function entry(e) {
-            this.props.entryHandler(e);
+        value: function entry() {
+            this.props.entryHandler();
         }
     }, {
         key: 'renewal',
-        value: function renewal(e) {
-            this.props.renewalHandler(e);
+        value: function renewal() {
+            this.props.renewalHandler();
         }
     }, {
         key: 'render',
@@ -397,13 +420,13 @@ var Buttons = function (_React$Component4) {
     return Buttons;
 }(React.Component);
 
-var EntryForm = function (_React$Component5) {
-    _inherits(EntryForm, _React$Component5);
+var Form = function (_React$Component5) {
+    _inherits(Form, _React$Component5);
 
-    function EntryForm(props) {
-        _classCallCheck(this, EntryForm);
+    function Form(props) {
+        _classCallCheck(this, Form);
 
-        var _this7 = _possibleConstructorReturn(this, (EntryForm.__proto__ || Object.getPrototypeOf(EntryForm)).call(this, props));
+        var _this7 = _possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, props));
 
         _this7.submit = _this7.submit.bind(_this7);
         _this7.cancel = _this7.cancel.bind(_this7);
@@ -412,40 +435,67 @@ var EntryForm = function (_React$Component5) {
         return _this7;
     }
 
-    _createClass(EntryForm, [{
+    _createClass(Form, [{
         key: 'submit',
         value: function submit(e) {
             var _this8 = this;
 
+            this.setState({ submitDisabled: true });
             var date = Date.parse(document.querySelector("#dateEntry").value) / 1000;
-            console.log(date);
             var csrftoken = getCookie('csrftoken');
-            fetch('/tracking', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    mode: "entry",
-                    entry: date
-                })
-            }).then(function (response) {
-                return response.json();
-            }).then(function (result) {
-                if (result.error) {
-                    console.log("Error");
-                } else {
-                    if (result.status == "successful") {
-                        _this8.props.submitHandler(result.data);
+
+            if (this.props.mode == "entry") {
+                fetch('/tracking', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: "entry",
+                        entry: date
+                    })
+                }).then(function (response) {
+                    return response.json();
+                }).then(function (result) {
+                    if (result.error) {
+                        console.log("Error");
+                        _this8.setState({ submitDisabled: false });
+                    } else {
+                        if (result.status == "successful") {
+                            _this8.props.submitHandler(result.data);
+                        }
                     }
-                }
-            });
+                });
+            } else if (this.props.mode == "renewal") {
+                fetch('/tracking', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: "renewal",
+                        entry: date
+                    })
+                }).then(function (response) {
+                    return response.json();
+                }).then(function (result) {
+                    if (result.error) {
+                        console.log("Error");
+                        _this8.setState({ submitDisabled: false });
+                    } else {
+                        if (result.status == "successful") {
+                            _this8.props.submitHandler(result.data);
+                        }
+                    }
+                });
+            }
         }
     }, {
         key: 'cancel',
-        value: function cancel(e) {
-            this.props.cancelHandler(e);
+        value: function cancel() {
+            this.props.cancelHandler();
         }
     }, {
         key: 'checkDate',
@@ -461,6 +511,24 @@ var EntryForm = function (_React$Component5) {
     }, {
         key: 'render',
         value: function render() {
+
+            var label = "";
+            var labelHelp = "";
+
+            if (this.props.mode == "renewal") {
+                label = "Renewal Date";
+                labelHelp = "The date that you will need to give your 90 days notification";
+            } else if (this.props.mode == "entry") {
+                label = "Entry Date";
+                labelHelp = "The date that you've entered Thailand";
+            } else if (this.props.mode == "departure") {
+                label = "Departure Date";
+                labelHelp = "The date that you left Thailand";
+            } else if (this.props.mode == "reported") {
+                label = "Entry Date";
+                labelHelp = "The date that you've given your 90 days notification";
+            }
+
             return React.createElement(
                 'div',
                 { className: 'container' },
@@ -473,13 +541,13 @@ var EntryForm = function (_React$Component5) {
                         React.createElement(
                             'label',
                             { htmlFor: 'inputEntry' },
-                            'Entry Date'
+                            label
                         ),
                         React.createElement('input', { type: 'date', className: 'form-control', id: 'dateEntry', 'aria-describedby': 'dateHelp', placeholder: 'Enter date', onChange: this.checkDate }),
                         React.createElement(
                             'small',
                             { id: 'dateHelp', className: 'form-text text-muted' },
-                            'The data that you\'ve entered Thailand'
+                            labelHelp
                         )
                     ),
                     React.createElement(
@@ -513,32 +581,5 @@ var EntryForm = function (_React$Component5) {
         }
     }]);
 
-    return EntryForm;
-}(React.Component);
-
-var RenewalForm = function (_React$Component6) {
-    _inherits(RenewalForm, _React$Component6);
-
-    function RenewalForm(props) {
-        _classCallCheck(this, RenewalForm);
-
-        return _possibleConstructorReturn(this, (RenewalForm.__proto__ || Object.getPrototypeOf(RenewalForm)).call(this, props));
-    }
-
-    _createClass(RenewalForm, [{
-        key: 'render',
-        value: function render() {
-            return React.createElement(
-                'div',
-                { className: 'container' },
-                React.createElement(
-                    'h1',
-                    null,
-                    'Reneal Form'
-                )
-            );
-        }
-    }]);
-
-    return RenewalForm;
+    return Form;
 }(React.Component);
