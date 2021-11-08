@@ -8,6 +8,8 @@ from selenium.webdriver.common.keys import Keys
 
 from datetime import datetime, timedelta
 
+from time import sleep
+
 class ViewTestCase(ViewBaseCase): 
     def setUp(self):
         super().setUp()
@@ -244,10 +246,10 @@ class UITestCase(UIBaseCase):
         tab_tracking = self.web_driver.find_element_by_id("tab_tracking")
         tab_tracking.click()
 
-        tab_tracking = self.web_driver.find_element_by_name("tab_tracking")
-        tab_history = self.web_driver.find_element_by_name("tab_history")
-        btn_entry = self.web_driver.find_element_by_name("btn_entry")
-        btn_renewal = self.web_driver.find_element_by_name("btn_renewal")
+        tab_tracking = self.web_driver.find_elements_by_name("tab_tracking")
+        tab_history = self.web_driver.find_elements_by_name("tab_history")
+        btn_entry = self.web_driver.find_elements_by_name("btn_entry")
+        btn_renewal = self.web_driver.find_elements_by_name("btn_renewal")
 
         self.assertEqual(len(tab_tracking), 1)
         self.assertEqual(len(tab_history), 1)
@@ -258,19 +260,19 @@ class UITestCase(UIBaseCase):
         tab_tracking = self.web_driver.find_element_by_id("tab_tracking")
         tab_tracking.click()
 
-        row_entry = self.web_driver.find_element_by_name("row_entry")
-        row_online_start = self.web_driver.find_element_by_name("row_online_start")
-        row_online_end = self.web_driver.find_element_by_name("row_online_end")
-        row_renewal = self.web_driver.find_element_by_name("row_renewal")
-        btn_report = self.web_driver.find_element_by_name("btn_report")
-        btn_depart = self.web_driver.find_element_by_name("btn_depart")
-        btn_delete = self.web_driver.find_element_by_name("btn_delete")
-        btn_gcal = self.web_driver.find_element_by_name("btn_gcal")
-        btn_ical = self.web_driver.find_element_by_name("btn_ical")
-        btn_outlook = self.web_driver.find_element_by_name("btn_outlook")
-        btn_yahoo = self.web_driver.find_element_by_name("btn_yahoo")
+        row_entry = self.web_driver.find_elements_by_name("row_entry")
+        row_online_start = self.web_driver.find_elements_by_name("row_online_start")
+        row_online_end = self.web_driver.find_elements_by_name("row_online_end")
+        row_renewal = self.web_driver.find_elements_by_name("row_renewal")
+        btn_report = self.web_driver.find_elements_by_name("btn_report")
+        btn_depart = self.web_driver.find_elements_by_name("btn_depart")
+        btn_delete = self.web_driver.find_elements_by_name("btn_delete")
+        btn_gcal = self.web_driver.find_elements_by_name("btn_gcal")
+        btn_ical = self.web_driver.find_elements_by_name("btn_ical")
+        btn_outlook = self.web_driver.find_elements_by_name("btn_outlook")
+        btn_yahoo = self.web_driver.find_elements_by_name("btn_yahoo")
 
-        # Reneal: Check UI elements
+        # Renewal: Check UI elements
         self.assertEqual(len(row_entry), 1)
         self.assertEqual(len(row_online_start), 1)
         self.assertEqual(len(row_online_end), 1)
@@ -285,7 +287,7 @@ class UITestCase(UIBaseCase):
 
         # Renewal: Check texts on buttons
         self.assertEqual(btn_report[0].text, "Report")
-        self.assertEquan(btn_depart[0].text, "Depart")
+        self.assertEqual(btn_depart[0].text, "Depart")
 
         self.assertEqual(row_entry[0].text, entry)
         self.assertEqual(row_online_start[0].text, online_start)
@@ -296,10 +298,10 @@ class UITestCase(UIBaseCase):
         btn_renewal = self.web_driver.find_element_by_id(btn)
         btn_renewal.click()
 
-        date_renewal = self.web_driver.find_element_by_id(btn)
+        date_renewal = self.web_driver.find_element_by_id("dateEntry")
         date_renewal.click()
         date_renewal.send_keys(date, Keys.TAB, "2021")
-
+        sleep(0.1)
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         btn_submit.click()
     
@@ -307,13 +309,13 @@ class UITestCase(UIBaseCase):
         tab_history = self.web_driver.find_element_by_id("tab_history")
         tab_history.click()
 
-        tbl_history_id = self.web_driver.find_element_by_name("tbl_history_id")
-        tbl_history_entry = self.web_driver.find_element_by_name("tbl_history_entry")
-        tbl_history_renewal = self.web_driver.find_element_by_name("tbl_history_renewal")
-        tbl_history_online_start = self.web_driver.find_element_by_name("tbl_history_online_start")
-        tbl_history_online_end = self.web_driver.find_element_by_name("tbl_history_online_end")
-        tbl_history_depart = self.web_driver.find_element_by_name("tbl_history_depart")
-        tbl_history_reported_date = self.web_driver.find_element_by_name("tbl_history_reported_date")
+        tbl_history_id = self.web_driver.find_elements_by_name("tbl_history_id")
+        tbl_history_entry = self.web_driver.find_elements_by_name("tbl_history_entry")
+        tbl_history_renewal = self.web_driver.find_elements_by_name("tbl_history_renewal")
+        tbl_history_online_start = self.web_driver.find_elements_by_name("tbl_history_online_start")
+        tbl_history_online_end = self.web_driver.find_elements_by_name("tbl_history_online_end")
+        tbl_history_depart = self.web_driver.find_elements_by_name("tbl_history_depart")
+        tbl_history_reported_date = self.web_driver.find_elements_by_name("tbl_history_reported_date")
 
         for i in range(row_num):
             self.assertEqual(tbl_history_id[i].text, data[i]["id"])
@@ -327,9 +329,9 @@ class UITestCase(UIBaseCase):
     # Write the test for both browsers here. 
     def test_full_tracking_flow(self):
         '''This is one test that test all the UI interactions of the system'''
+        self.web_driver.implicitly_wait(1)
+        self._signup_user(self.username, self.email, self.password, self.password, False)
         self._login(self.username, self.password)
-        self._signup_user("wpass", "wpass@wpass.com", "12345678", "87654321", False)
-        
         # Test the existance of tracking, history, entry and renewal since start.
         self._check_tracking_elements_blank()
         # TODO: I suspect I will need to add test cases to test if the tab is active or not. 
@@ -338,19 +340,19 @@ class UITestCase(UIBaseCase):
         self._renew("0405")
 
         # Renewal: Check the page render after the renewal adding has been added successfully. 
-        self._check_tracking_elements_with_record("-", "20 April 2021", "27 April 2021", "4 May 2021")
+        self._check_tracking_elements_with_record("-", "Tue Apr 20 2021", "Tue Apr 27 2021", "Tue May 04 2021")
         
-        btn_renew = self.web_driver.find_element_by_id("btn_renew")
+        btn_renew = self.web_driver.find_element_by_id("btn_report")
         btn_renew.click()
 
         # Test cancel button after 
         btn_cancel = self.web_driver.find_element_by_id("btn_cancel")
         btn_cancel.click()
 
-        self._renew("0406")
+        self._renew("0406", "btn_report")
 
         # Reported: Check the page render after the renewal adding has been added successfully. 
-        self._check_tracking_elements_with_record("-", "21 May 2021", "28 May 2021", "4 June 2021")
+        self._check_tracking_elements_with_record("-", "Thu Aug 19 2021", "Thu Aug 26 2021", "Thu Sep 02 2021")
         
         # Test delete
         btn_delete = self.web_driver.find_element_by_id("btn_delete")

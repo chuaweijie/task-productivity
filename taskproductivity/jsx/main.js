@@ -225,10 +225,10 @@ class Tracking extends React.Component {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{entry}</td>
-                                <td>{onlineStart}</td>
-                                <td>{onlineEnd}</td>
-                                <td>{renewal}</td>
+                                <td name="row_entry">{entry}</td>
+                                <td name="row_online_start">{onlineStart}</td>
+                                <td name="row_online_end">{onlineEnd}</td>
+                                <td name="row_renewal">{renewal}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -236,13 +236,13 @@ class Tracking extends React.Component {
                 <div className="container">
                     <div className="row">
                         <div className="col-sm  text-center">
-                            <button type="submit" className="btn btn-danger mt-3" id="btn_delete" data-id={id} onClick={this.deleteHandler}>Delete</button>
+                            <button type="submit" className="btn btn-danger mt-3" id="btn_delete" name="btn_delete" data-id={id} onClick={this.deleteHandler}>Delete</button>
                         </div>
                         <div className="col-sm  text-center">
-                            <button type="submit" className="btn btn-secondary mt-3" id="btn_depart" data-id={id} onClick={this.departHandler}>Depart</button>
+                            <button type="submit" className="btn btn-secondary mt-3" id="btn_depart" name="btn_depart" data-id={id} onClick={this.departHandler}>Depart</button>
                         </div>
                         <div className="col-sm  text-center">
-                            <button type="submit" className="btn btn-primary mt-3" id="btn_report" data-id={id} onClick={this.reportHandler}>Report</button>
+                            <button type="submit" className="btn btn-primary mt-3" id="btn_report" name="btn_report" data-id={id} onClick={this.reportHandler}>Report</button>
                         </div>
                     </div>
                 </div>
@@ -326,7 +326,7 @@ class History extends React.Component {
                 reportedDate = new Date(row.reported_date * 1000).toDateString();
             }
             rows.push(
-                <tr key={row.id}>
+                <tr key={row.id} name="row_entry">
                     <td>{button}</td>
                     <td>{entry}</td>
                     <td>{onlineStart}</td>

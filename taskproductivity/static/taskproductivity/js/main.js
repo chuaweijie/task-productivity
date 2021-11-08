@@ -316,22 +316,22 @@ var Tracking = function (_React$Component2) {
                                 null,
                                 React.createElement(
                                     'td',
-                                    null,
+                                    { name: 'row_entry' },
                                     entry
                                 ),
                                 React.createElement(
                                     'td',
-                                    null,
+                                    { name: 'row_online_start' },
                                     onlineStart
                                 ),
                                 React.createElement(
                                     'td',
-                                    null,
+                                    { name: 'row_online_end' },
                                     onlineEnd
                                 ),
                                 React.createElement(
                                     'td',
-                                    null,
+                                    { name: 'row_renewal' },
                                     renewal
                                 )
                             )
@@ -349,7 +349,7 @@ var Tracking = function (_React$Component2) {
                             { className: 'col-sm  text-center' },
                             React.createElement(
                                 'button',
-                                { type: 'submit', className: 'btn btn-danger mt-3', id: 'btn_delete', 'data-id': id, onClick: this.deleteHandler },
+                                { type: 'submit', className: 'btn btn-danger mt-3', id: 'btn_delete', name: 'btn_delete', 'data-id': id, onClick: this.deleteHandler },
                                 'Delete'
                             )
                         ),
@@ -358,7 +358,7 @@ var Tracking = function (_React$Component2) {
                             { className: 'col-sm  text-center' },
                             React.createElement(
                                 'button',
-                                { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_depart', 'data-id': id, onClick: this.departHandler },
+                                { type: 'submit', className: 'btn btn-secondary mt-3', id: 'btn_depart', name: 'btn_depart', 'data-id': id, onClick: this.departHandler },
                                 'Depart'
                             )
                         ),
@@ -367,7 +367,7 @@ var Tracking = function (_React$Component2) {
                             { className: 'col-sm  text-center' },
                             React.createElement(
                                 'button',
-                                { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_report', 'data-id': id, onClick: this.reportHandler },
+                                { type: 'submit', className: 'btn btn-primary mt-3', id: 'btn_report', name: 'btn_report', 'data-id': id, onClick: this.reportHandler },
                                 'Report'
                             )
                         )
@@ -402,7 +402,6 @@ var History = function (_React$Component3) {
 
             var id = e.target.dataset.id;
             var csrftoken = getCookie('csrftoken');
-            console.log("in undoHandler");
             fetch('/history', {
                 method: 'PUT',
                 headers: {
@@ -432,7 +431,6 @@ var History = function (_React$Component3) {
 
             var rows = [];
             var createButton = true;
-            console.log(data);
             data.forEach(function (row) {
                 var button = "-";
                 if (createButton) {
@@ -475,7 +473,7 @@ var History = function (_React$Component3) {
                 }
                 rows.push(React.createElement(
                     'tr',
-                    { key: row.id },
+                    { key: row.id, name: 'row_entry' },
                     React.createElement(
                         'td',
                         null,
@@ -685,8 +683,6 @@ var Form = function (_React$Component5) {
                     }
                 });
             } else if (this.props.mode == "renewal") {
-                console.log("in renwal if");
-                console.log(date);
                 fetch('/tracking', {
                     method: 'POST',
                     headers: {
@@ -777,8 +773,6 @@ var Form = function (_React$Component5) {
     }, {
         key: 'checkDate',
         value: function checkDate(e) {
-            console.log(e.target.value);
-            console.log(e.target.value.length);
             if (e.target.value.length > 0) {
                 this.setState({ submitDisabled: false });
             } else {
