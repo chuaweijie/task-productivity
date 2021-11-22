@@ -1,4 +1,9 @@
-import {getCookie} from './helpers.js';
+import {getCookie} from '../static/taskproductivity/js/helpers.js';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import React from "react";
+import ReactDOM from "react-dom";
+
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -140,8 +145,6 @@ class Main extends React.Component {
     }
 }
 
-
-
 // Write the UI
 class Tracking extends React.Component {
     constructor(props) {
@@ -149,11 +152,23 @@ class Tracking extends React.Component {
         this.deleteHandler = this.deleteHandler.bind(this);
         this.departHandler = this.departHandler.bind(this);
         this.reportHandler = this.reportHandler.bind(this);
+        this.showModal = this.showModal.bind(this);
+        this.hideModal = this.hideModal.bind(this);
+        this.state = {showModal: false};
     }
 
-    deleteHandler(e) {
+    showModal(e){
+        this.setState({showModal: true});
+    }
+
+    hideModal(e){
+        this.setState({showModal: false});
+    }   
+
+    deleteHandler() {
         // TODO have a confirmation dialog before really deleting it. 
-        const id = e.target.dataset.id;
+        const btn_delete = document.querySelector("#btn_delete");
+        const id = btn_delete.dataset.id;
         const csrftoken = getCookie('csrftoken');
         fetch('/tracking', {
             method: 'DELETE',
@@ -236,7 +251,7 @@ class Tracking extends React.Component {
                 <div className="container">
                     <div className="row">
                         <div className="col-sm  text-center">
-                            <button type="submit" className="btn btn-danger mt-3" id="btn_delete" name="btn_delete" data-id={id} onClick={this.deleteHandler}>Delete</button>
+                            <button type="submit" className="btn btn-danger mt-3" id="btn_delete" name="btn_delete" data-id={id} onClick={this.showModal}>Delete</button>
                         </div>
                         <div className="col-sm  text-center">
                             <button type="submit" className="btn btn-secondary mt-3" id="btn_depart" name="btn_depart" data-id={id} onClick={this.departHandler}>Depart</button>
@@ -246,6 +261,20 @@ class Tracking extends React.Component {
                         </div>
                     </div>
                 </div>
+                <Modal show={this.state.showModal} onHide={this.hideModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Delete Confirmation</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        <p>Are you sure you want to delete this record? </p>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={this.hideModal} id="btn_cancel">Close</Button>
+                        <Button variant="danger" onClick={this.deleteHandler} id="btn_yes">Delete</Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         );
     }
@@ -256,7 +285,18 @@ class History extends React.Component {
     constructor(props) {
         super(props);
         this.undoHandler = this.undoHandler.bind(this);
+        this.showModal = this.showModal.bind(this);
+        this.hideModal = this.hideModal.bind(this);
+        this.state = {showModal: false};
     }
+
+    showModal(e){
+        this.setState({showModal: true});
+    }
+
+    hideModal(e){
+        this.setState({showModal: false});
+    }   
 
     undoHandler(e) {
         const id = e.target.dataset.id;
@@ -280,6 +320,9 @@ class History extends React.Component {
             else {
                 if (result.status == "successful") {
                     this.props.submitHandler(result.data);
+                }
+                else if (result.status == "Error"){
+                    this.showModal();
                 }
             }
         });
@@ -345,23 +388,38 @@ class History extends React.Component {
         const rows = this.packData(this.props.data);
 
         return (
-            <div className="table-responsive">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col"></th>
-                            <th scope="col">Entry</th>
-                            <th scope="col">Online Start</th>
-                            <th scope="col">Online End</th>
-                            <th scope="col">Renewal Date</th>
-                            <th scope="col">Departure Date</th>
-                            <th scope="col">Reported Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            {rows}
-                    </tbody>
-                </table>
+            <div>
+                <div className="table-responsive">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Entry</th>
+                                <th scope="col">Online Start</th>
+                                <th scope="col">Online End</th>
+                                <th scope="col">Renewal Date</th>
+                                <th scope="col">Departure Date</th>
+                                <th scope="col">Reported Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                {rows}
+                        </tbody>
+                    </table>
+                </div>
+                <Modal show={this.state.showModal} onHide={this.hideModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>An error has occured</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <p>Cannot undo history. There is an active record.</p>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="primary" onClick={this.hideModal} id="btn_cancel">OK</Button>
+                </Modal.Footer>
+            </Modal>
             </div>
         );
     }
