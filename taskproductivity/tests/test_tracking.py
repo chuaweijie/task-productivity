@@ -260,6 +260,8 @@ class UITestCase(UIBaseCase):
         tab_tracking = self.web_driver.find_element_by_id("tab_tracking")
         tab_tracking.click()
 
+        sleep(0.1)
+
         row_entry = self.web_driver.find_elements_by_name("row_entry")
         row_online_start = self.web_driver.find_elements_by_name("row_online_start")
         row_online_end = self.web_driver.find_elements_by_name("row_online_end")
@@ -267,10 +269,8 @@ class UITestCase(UIBaseCase):
         btn_report = self.web_driver.find_elements_by_name("btn_report")
         btn_depart = self.web_driver.find_elements_by_name("btn_depart")
         btn_delete = self.web_driver.find_elements_by_name("btn_delete")
-        btn_gcal = self.web_driver.find_elements_by_name("btn_gcal")
-        btn_ical = self.web_driver.find_elements_by_name("btn_ical")
-        btn_outlook = self.web_driver.find_elements_by_name("btn_outlook")
-        btn_yahoo = self.web_driver.find_elements_by_name("btn_yahoo")
+        btn_gcal_deadline = self.web_driver.find_elements_by_name("btn_gcal_deadline")
+        btn_gcal_online = self.web_driver.find_elements_by_name("btn_gcal_online")
 
         # Renewal: Check UI elements
         self.assertEqual(len(row_entry), 1)
@@ -280,10 +280,8 @@ class UITestCase(UIBaseCase):
         self.assertEqual(len(btn_report), 1)
         self.assertEqual(len(btn_depart), 1)
         self.assertEqual(len(btn_delete), 1)
-        self.assertEqual(len(btn_gcal), 1)
-        self.assertEqual(len(btn_ical), 1)
-        self.assertEqual(len(btn_outlook), 1)
-        self.assertEqual(len(btn_yahoo), 1)
+        self.assertEqual(len(btn_gcal_deadline), 1)
+        self.assertEqual(len(btn_gcal_online), 1)
 
         # Renewal: Check texts on buttons
         self.assertEqual(btn_report[0].text, "Report")
@@ -309,16 +307,16 @@ class UITestCase(UIBaseCase):
         tab_history = self.web_driver.find_element_by_id("tab_history")
         tab_history.click()
 
-        tbl_history_id = self.web_driver.find_elements_by_name("tbl_history_id")
+        sleep(0.1)
+
         tbl_history_entry = self.web_driver.find_elements_by_name("tbl_history_entry")
         tbl_history_renewal = self.web_driver.find_elements_by_name("tbl_history_renewal")
         tbl_history_online_start = self.web_driver.find_elements_by_name("tbl_history_online_start")
         tbl_history_online_end = self.web_driver.find_elements_by_name("tbl_history_online_end")
         tbl_history_depart = self.web_driver.find_elements_by_name("tbl_history_depart")
         tbl_history_reported_date = self.web_driver.find_elements_by_name("tbl_history_reported_date")
-
+    
         for i in range(row_num):
-            self.assertEqual(tbl_history_id[i].text, data[i]["id"])
             self.assertEqual(tbl_history_entry[i].text, data[i]["entry"])
             self.assertEqual(tbl_history_renewal[i].text, data[i]["renewal"])
             self.assertEqual(tbl_history_online_start[i].text, data[i]["online_start"])
@@ -367,33 +365,35 @@ class UITestCase(UIBaseCase):
         self._check_tracking_elements_blank()
         
         self._renew("0407")
-        self._check_tracking_elements_with_record("-", "20 June 2021", "27 June 2021", "4 July 2021")
+        self._check_tracking_elements_with_record("-", "Sun Jun 20 2021", "Sun Jun 27 2021", "Sun Jul 04 2021")
 
         # Test departure
         btn_depart = self.web_driver.find_element_by_id("btn_depart")
         btn_depart.click()
 
-        date_depart = self.web_driver.find_element_by_id("date_depart")
+        date_depart = self.web_driver.find_element_by_id("dateEntry")
         date_depart.click()
         date_depart.send_keys("1507", Keys.TAB ,"2021")
+        btn_submit = self.web_driver.find_element_by_id("btn_submit")
+        btn_submit.click()
 
         self._check_tracking_elements_blank()
         
         # Test clicking on history to check records
-        data = [{   "id": 1,
+        data = [{   "id": 3,
                     "entry": "-", 
-                    "renewal": "4 May 2021", 
-                    "online_start": "20 April 2021",
-                    "online_end": "27 April 2021",
+                    "renewal": "Sun Jul 04 2021", 
+                    "online_start": "Sun Jun 20 2021",
+                    "online_end": "Sun Jun 27 2021",
+                    "depart": "Thu Jul 15 2021",
+                    "reported_date": "-"}, 
+                {   "id": 1,
+                    "entry": "-", 
+                    "renewal": "Tue May 04 2021", 
+                    "online_start": "Tue Apr 20 2021",
+                    "online_end": "Tue Apr 27 2021",
                     "depart": "-",
-                    "reported_date": "4 June 2021"},
-                {   "id": 3,
-                    "entry": "-", 
-                    "renewal": "4 July 2021", 
-                    "online_start": "20 June 2021",
-                    "online_end": "27 June 2021",
-                    "depart": "15 July 2021",
-                    "reported_date": "-"}]
+                    "reported_date": "Fri Jun 04 2021"}]
         
         self._check_history(data, 2)
 
@@ -403,37 +403,37 @@ class UITestCase(UIBaseCase):
 
         btn_entry = self.web_driver.find_element_by_id("btn_entry")
         btn_entry.click()
-        date_depart = self.web_driver.find_element_by_id("date_entry")
+        date_depart = self.web_driver.find_element_by_id("dateEntry")
         date_depart.click()
         date_depart.send_keys("0408", Keys.TAB, "2021")
         btn_submit = self.web_driver.find_element_by_id("btn_submit")
         btn_submit.click()
 
-        self._check_tracking_elements_with_record("4 August 2021", "21 August 2021", "28 August 2021", "3 September 2021")
+        self._check_tracking_elements_with_record("Wed Aug 04 2021", "Tue Oct 19 2021", "Tue Oct 26 2021", "Tue Nov 02 2021")
 
         # Test marking as reported to check history
         self._renew("3108", "btn_report")
-        data = [{   "id": 1,
-                    "entry": "-", 
-                    "renewal": "4 May 2021", 
-                    "online_start": "20 April 2021",
-                    "online_end": "27 April 2021",
+        data = [{   "id": 4,
+                    "entry": "Wed Aug 04 2021", 
+                    "renewal": "Tue Nov 02 2021", 
+                    "online_start": "Tue Oct 19 2021",
+                    "online_end": "Tue Oct 26 2021",
                     "depart": "-",
-                    "reported_date": "4 June 2021"},
+                    "reported_date": "Tue Aug 31 2021"},
                 {   "id": 3,
                     "entry": "-", 
-                    "renewal": "4 July 2021", 
-                    "online_start": "20 June 2021",
-                    "online_end": "27 June 2021",
-                    "depart": "15 July 2021",
+                    "renewal": "Sun Jul 04 2021", 
+                    "online_start": "Sun Jun 20 2021",
+                    "online_end": "Sun Jun 27 2021",
+                    "depart": "Thu Jul 15 2021",
                     "reported_date": "-"}, 
-                {   "id": 4,
-                    "entry": "4 August 2021", 
-                    "renewal": "3 September 2021", 
-                    "online_start": "21 August 2021",
-                    "online_end": "28 August 2021",
-                    "departure": "-",
-                    "reported_date": "31 August 2021"}]
+                {   "id": 1,
+                    "entry": "-", 
+                    "renewal": "Tue May 04 2021", 
+                    "online_start": "Tue Apr 20 2021",
+                    "online_end": "Tue Apr 27 2021",
+                    "depart": "-",
+                    "reported_date": "Fri Jun 04 2021"}]
 
         # The history has one more record
         self._check_history(data, 3)
@@ -454,24 +454,24 @@ class UITestCase(UIBaseCase):
         btn_undo = self.web_driver.find_element_by_id("btn_undo")
         btn_undo.click()
 
-        data = [{   "id": 1,
+        data = [{   "id": 3,
                     "entry": "-", 
-                    "renewal": "4 May 2021", 
-                    "online_start": "20 April 2021",
-                    "online_end": "27 April 2021",
+                    "renewal": "Sun Jul 04 2021", 
+                    "online_start": "Sun Jun 20 2021",
+                    "online_end": "Sun Jun 27 2021",
+                    "depart": "Thu Jul 15 2021",
+                    "reported_date": "-"}, 
+                {   "id": 1,
+                    "entry": "-", 
+                    "renewal": "Tue May 04 2021", 
+                    "online_start": "Tue Apr 20 2021",
+                    "online_end": "Tue Apr 27 2021",
                     "depart": "-",
-                    "reported_date": "4 June 2021"},
-                {   "id": 3,
-                    "entry": "-", 
-                    "renewal": "4 July 2021", 
-                    "online_start": "20 June 2021",
-                    "online_end": "27 June 2021",
-                    "depart": "15 July 2021",
-                    "reported_date": "-"}]
+                    "reported_date": "Fri Jun 04 2021"}]
 
         # The history has one less record
         self._check_history(data, 2)
-        self._check_tracking_elements_with_record("4 August 2021", "21 August 2021", "28 August 2021", "3 September 2021")
+        self._check_tracking_elements_with_record("Wed Aug 04 2021", "Tue Oct 19 2021", "Tue Oct 26 2021", "Tue Nov 02 2021")
 
 
     

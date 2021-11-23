@@ -145,7 +145,7 @@ class Main extends React.Component {
     }
 }
 
-// Write the UI
+
 class Tracking extends React.Component {
     constructor(props) {
         super(props);
@@ -154,6 +154,8 @@ class Tracking extends React.Component {
         this.reportHandler = this.reportHandler.bind(this);
         this.showModal = this.showModal.bind(this);
         this.hideModal = this.hideModal.bind(this);
+        this.numDate = this.numDate.bind(this);
+        this.twoDigits = this.twoDigits.bind(this);
         this.state = {showModal: false};
     }
 
@@ -166,7 +168,6 @@ class Tracking extends React.Component {
     }   
 
     deleteHandler() {
-        // TODO have a confirmation dialog before really deleting it. 
         const btn_delete = document.querySelector("#btn_delete");
         const id = btn_delete.dataset.id;
         const csrftoken = getCookie('csrftoken');
@@ -194,6 +195,23 @@ class Tracking extends React.Component {
         
     }
 
+    twoDigits(num, flag) {
+        if (flag == 'm') {
+            const temp = num + 1;
+            return temp < 10 ? '0' + temp : '' + temp;    
+        }
+        else if (flag == 'd') {
+            return num < 10 ? '0' + num : '' + num;
+        }
+    }
+
+    numDate(tmpDate) {
+        const year = tmpDate.getFullYear();
+        const month = this.twoDigits(tmpDate.getMonth(), 'm');
+        const date = this.twoDigits(tmpDate.getDate(), 'd');
+        return '' + year + month + date;
+    }
+
     departHandler(e) {
         const id = e.target.dataset.id;
         this.props.showDepartureForm(id);
@@ -211,20 +229,36 @@ class Tracking extends React.Component {
         let onlineStart = '-';
         let onlineEnd = '-';
         let renewal = '-';
+        let gCalOnlineStart = '';
+        let gCalOnlineEnd = '';
+        let gCalRenewal = '';
+
         if (this.props.data.entry !== null) {
             entry = new Date(this.props.data.entry * 1000).toDateString();
         }
         if (this.props.data.onlineStart !== null) {
-            onlineStart = new Date(this.props.data.online_start * 1000).toDateString();
+            const tmpOnlineStart = new Date(this.props.data.online_start * 1000);
+            onlineStart = tmpOnlineStart.toDateString();
+            gCalOnlineStart = this.numDate(tmpOnlineStart);
         }
 
         if (this.props.data.onlineEnd !== null) {
-            onlineEnd = new Date(this.props.data.online_end * 1000).toDateString();
+            let tmpOnlineEnd = new Date(this.props.data.online_end * 1000);
+            onlineEnd = tmpOnlineEnd.toDateString();
+            tmpOnlineEnd.setDate(tmpOnlineEnd.getDate() + 1);
+            gCalOnlineEnd = this.numDate(tmpOnlineEnd);
         }
         
         if (this.props.data.renewal !== null) {
-            renewal = new Date(this.props.data.renewal * 1000).toDateString();
+            let tmpRenewal = new Date(this.props.data.renewal * 1000);
+            renewal = tmpRenewal.toDateString();
+            const strNumDateStart = this.numDate(tmpRenewal);
+            tmpRenewal.setDate(tmpRenewal.getDate() + 1);
+            const strNumDateEnd = this.numDate(tmpRenewal);
+            gCalRenewal = "https://calendar.google.com/calendar/r/eventedit?text=Online+90+Days+Reporting&dates="+strNumDateStart+"/"+strNumDateEnd+"&ctz=Asia/Bangkok";
         }
+
+        const gCalOnline = "https://calendar.google.com/calendar/r/eventedit?text=90+Days+Reporting+Deadline&dates="+gCalOnlineStart+"/"+gCalOnlineEnd+"&ctz=Asia/Bangkok"
 
         return (
             <div>
@@ -258,6 +292,16 @@ class Tracking extends React.Component {
                         </div>
                         <div className="col-sm  text-center">
                             <button type="submit" className="btn btn-primary mt-3" id="btn_report" name="btn_report" data-id={id} onClick={this.reportHandler}>Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div className="continer mt-3">
+                    <div className="row">
+                        <div className="col-sm  text-center">
+                            <a className="btn btn-success mt-3" href={gCalOnline} id="btn_gcal_online" name="btn_gcal_online" target="_blank">Add Online Reporting to Google Calendar</a>
+                        </div>
+                        <div className="col-sm  text-center">
+                            <a className="btn btn-danger mt-3" href={gCalRenewal} id="btn_gcal_deadline" name="btn_gcal_deadline" target="_blank">Add Deadline to Google Calendar</a>
                         </div>
                     </div>
                 </div>
@@ -371,12 +415,12 @@ class History extends React.Component {
             rows.push(
                 <tr key={row.id} name="row_entry">
                     <td>{button}</td>
-                    <td>{entry}</td>
-                    <td>{onlineStart}</td>
-                    <td>{onlineEnd}</td>
-                    <td>{renewal}</td>
-                    <td>{departure}</td>
-                    <td>{reportedDate}</td>
+                    <td name="tbl_history_entry">{entry}</td>
+                    <td name="tbl_history_online_start">{onlineStart}</td>
+                    <td name="tbl_history_online_end">{onlineEnd}</td>
+                    <td name="tbl_history_renewal">{renewal}</td>
+                    <td name="tbl_history_depart">{departure}</td>
+                    <td name="tbl_history_reported_date">{reportedDate}</td>
                 </tr>
             );
         });

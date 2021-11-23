@@ -48,7 +48,7 @@ class ViewTestCase(ViewBaseCase):
         # Test the case where all the data are ok. 
         data['confirmation'] = '1234'
         response = self._csrf_post("/signup", data)
-        self.assertEqual(response.url, '/tasks')
+        self.assertEqual(response.url, '/main')
         self.assertEqual(response.status_code, 302)
     
     def test_username_check(self):
@@ -125,7 +125,7 @@ class UITestCase(UIBaseCase):
     def test_registration(self):
         '''Testing the registration of a user'''
         self._signup_user("new_user", "new@new.com", "12345678", "12345678")
-        self.assertEqual(self.web_driver.current_url, '%s%s' % (self.live_server_url, '/tasks'))
+        self.assertEqual(self.web_driver.current_url, '%s%s' % (self.live_server_url, '/main'))
     
 
 class UITestCaseChrome(UITestCase, StaticLiveServerTestCase):
