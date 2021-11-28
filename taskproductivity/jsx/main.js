@@ -41,6 +41,7 @@ class Main extends React.Component {
         this.switchTracking();
     }
 
+    // Load data from the server when the tracking button is clicked
     switchTracking() {
         fetch(`/tracking`)
         .then(response => response.json())
@@ -59,6 +60,7 @@ class Main extends React.Component {
         });
     }
 
+    // Load data from the server when the history button is clicked
     switchHistory() {
         fetch(`/history`)
         .then(response => response.json())
@@ -78,6 +80,7 @@ class Main extends React.Component {
         
     }
 
+    // Pump the data into the tracking component and display it
     displayTrackingData(data) {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -85,6 +88,7 @@ class Main extends React.Component {
                         history: null});
     }
 
+    // Pump the data into the history component and display it
     displayHistoryData(data) {
         this.setState({trackingClass: "nav-link", 
                         historyClass: "nav-link active", 
@@ -92,6 +96,7 @@ class Main extends React.Component {
                         history: <History data={data} submitHandler={this.displayHistoryData}/>});
     }
 
+    // The function to display the buttons when there are no records.
     displayButtons() {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -99,6 +104,7 @@ class Main extends React.Component {
                         history: null});            
     }
 
+    // Show the entry form.
     entryHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -106,6 +112,7 @@ class Main extends React.Component {
                         history: null});            
     }
 
+    // Show the renewal form.
     renewalHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -113,6 +120,7 @@ class Main extends React.Component {
                         history: null});
     }
 
+    // Show the departure form.
     departureHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -120,6 +128,7 @@ class Main extends React.Component {
                         history: null});
     }
 
+    // Show the reported form
     reportedHandler(id="null") {
         this.setState({trackingClass: "nav-link active", 
                         historyClass: "nav-link", 
@@ -159,14 +168,17 @@ class Tracking extends React.Component {
         this.state = {showModal: false};
     }
 
+    // Show the bootstrap modal (a.k.a. alert).
     showModal(e){
         this.setState({showModal: true});
     }
 
+    // Hide the bootstrap modal (a.k.a. alert).
     hideModal(e){
         this.setState({showModal: false});
     }   
 
+    // Call the delete API to delete the record. This is executed after the user selected ok in modal.
     deleteHandler() {
         const btn_delete = document.querySelector("#btn_delete");
         const id = btn_delete.dataset.id;
@@ -195,6 +207,7 @@ class Tracking extends React.Component {
         
     }
 
+    // Helper function to ensure that the dates are in two digits for the JS date format.
     twoDigits(num, flag) {
         if (flag == 'm') {
             const temp = num + 1;
@@ -205,6 +218,7 @@ class Tracking extends React.Component {
         }
     }
 
+    // This is to convert the text date into numbers
     numDate(tmpDate) {
         const year = tmpDate.getFullYear();
         const month = this.twoDigits(tmpDate.getMonth(), 'm');
@@ -212,11 +226,13 @@ class Tracking extends React.Component {
         return '' + year + month + date;
     }
 
+    // Show the deprture form if the departure button is clicked
     departHandler(e) {
         const id = e.target.dataset.id;
         this.props.showDepartureForm(id);
     }
 
+    // Show the report form if the report button is clicked
     reportHandler(e) {
         const id = e.target.dataset.id;
         this.props.showReportForm(id);
@@ -224,6 +240,7 @@ class Tracking extends React.Component {
 
     render(){
 
+        // Prepare the variables needed
         const id = this.props.data.id
         let entry = '-';
         let onlineStart = '-';
@@ -249,6 +266,7 @@ class Tracking extends React.Component {
             gCalOnlineEnd = this.numDate(tmpOnlineEnd);
         }
         
+        // Prepare the add to Google calendar date.
         if (this.props.data.renewal !== null) {
             let tmpRenewal = new Date(this.props.data.renewal * 1000);
             renewal = tmpRenewal.toDateString();
@@ -324,7 +342,7 @@ class Tracking extends React.Component {
     }
 }
 
-// Write the UI
+
 class History extends React.Component {
     constructor(props) {
         super(props);
@@ -334,14 +352,16 @@ class History extends React.Component {
         this.state = {showModal: false};
     }
 
+    // Show modal when some thing cannot be undo
     showModal(e){
         this.setState({showModal: true});
     }
-
+    // Triggered when the modal is dismissed
     hideModal(e){
         this.setState({showModal: false});
     }   
 
+    // Attempt to undo it. If it can't be undoed, trigger modal to notify user
     undoHandler(e) {
         const id = e.target.dataset.id;
         const csrftoken = getCookie('csrftoken');
@@ -373,6 +393,7 @@ class History extends React.Component {
         
     }
 
+    // Heper function to modify data into displayable format and put them into the HTML
     packData(data) {
         const rows = [];
         let createButton = true;
@@ -470,6 +491,7 @@ class History extends React.Component {
 }
 
 
+// The buttons displayed when there are no active records in tracking.
 class Buttons extends React.Component {
     constructor(props) {
         super(props);
@@ -501,6 +523,8 @@ class Buttons extends React.Component {
     }
 }
 
+
+// The form displayed for different scenarios during the reporting process.
 class Form extends React.Component {
     constructor(props) {
         super(props);

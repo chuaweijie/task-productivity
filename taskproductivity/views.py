@@ -277,7 +277,6 @@ def tracking(request):
     elif request.method == "POST":
         mode = data.get("mode")
         if mode == "renewal":
-            # TODO refractor this into a function
             renewal = datetime.fromtimestamp(int(data.get("renewal")))
             return new_renewal_date(renewal, request.user)
 
