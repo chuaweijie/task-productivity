@@ -2,6 +2,7 @@ import json, hashlib
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -9,18 +10,40 @@ from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.utils import timezone
+from mailjet_rest.client import DoesNotExistError
 
-from .utils import send_email
+from .utils import send_email, convert_to_timestamp
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-from taskproductivity.models import User, Recoveries
+from taskproductivity.models import ERDates, User, Recoveries
+
+# Helper function. Not sure where to put it so I'll put it here first.
+def new_renewal_date(renewal_date, user):
+    online_start = renewal_date - timedelta(days=14)
+    online_end = renewal_date - timedelta(days=7)
+    try:
+        erdate = ERDates.objects.create(user=user, renewal=renewal_date, online_start=online_start, online_end=online_end)
+    except IntegrityError as e:
+        print(e)
+        return JsonResponse({"error":e},status=400)
+    entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
+    return JsonResponse({   "status": "successful",
+                            "data": {   "id": erdate.id,
+                                        "entry": entry, 
+                                        "renewal": renewal, 
+                                        "online_start": online_start,
+                                        "online_end": online_end}
+                        }, status=200)
 
 # Create your views here.
 @ensure_csrf_cookie
 def index(request):
     # How to check if the user is already logged in? 
-    return render(request, "taskproductivity/index.html")
+    if not request.user.is_authenticated:
+        return render(request, "taskproductivity/index.html")
+    elif request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("main"))
 
 def login_view(request):
     if request.method == "POST":
@@ -31,7 +54,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("tasks"))
+            return HttpResponseRedirect(reverse("main"))
         else:
             return render(request, "taskproductivity/login.html", {
                 "type": "danger",
@@ -72,7 +95,7 @@ def signup(request):
             }, status=400)
         login(request, user)
         # Should redirect to task in the future
-        return HttpResponseRedirect(reverse("tasks"))
+        return HttpResponseRedirect(reverse("main"))
     else:
         return render(request, "taskproductivity/signup.html")
 
@@ -110,23 +133,6 @@ def username(request):
     else:
         raise PermissionDenied
 
-def tasks(request):
-    if request.method == "GET":
-        return render(request, "taskproductivity/tasks.html")
-    else:
-        raise PermissionDenied
-
-def task_data(request, user_id, page_no):
-    response = {}
-    return JsonResponse(response)
-
-def man_task(request):
-    response = {}
-    return JsonResponse(response)
-
-
-def report(request):
-    return render(request, "taskproductivity/report.html")
 
 @ensure_csrf_cookie
 def recovery(request):
@@ -157,7 +163,14 @@ def recovery(request):
                 # Only create new entry if past request is more than 5 minutes old to prevent spanning.
                 timediff = timezone.now() - old_keys[0].time
                 if timediff > timedelta(minutes=5):
-                    old_keys.update(active=False)
+                    try:
+                        old_keys.update(active=False)
+                    except IntegrityError as e:
+                        print(e)
+                        return render(request, "taskproductivity/recovery.html", {
+                            "type": "danger",
+                            "message": "An error has occured. Please contact the administrator with this message: " + e
+                    }, status=200)
                 else:
                     return render(request, "taskproductivity/recovery.html", {
                         "type": "success",
@@ -189,7 +202,10 @@ def reset_password(request, key=None):
                         "key": key
                     })
                 # If key is older than 1 hour, set it's active to false
-                keys.update(active=False)
+                try:
+                    keys.update(active=False)
+                except IntegrityError as e:
+                    print(e)
 
         # When no key or an incorrect key is provided.
         return render(request, "taskproductivity/index.html", {
@@ -211,7 +227,15 @@ def reset_password(request, key=None):
                     user = User.objects.get(username=old_keys[0].user)
                     user.set_password(password)
                     user.save()
-                    old_keys.update(active=False)
+                    try:
+                        old_keys.update(active=False)
+                    except IntegrityError as e:
+                        print(e)
+                        return render(request, "taskproductivity/reset.html", {
+                            "type": "danger",
+                            "message": "An error has occured. Please contact the administrator with this message: " + e
+                        }, status=200)
+                    # Return to login page upon update success
                     return render(request, "taskproductivity/login.html", {
                         "type": "success",
                         "message": "You've successfully changed your password. Please login now."
@@ -229,3 +253,121 @@ def reset_password(request, key=None):
             "type": "danger",
             "message": "Key error. Recovery key is probably older than 1 hour. Please request for the password reset and try again"
         }, status=400)
+
+
+@ensure_csrf_cookie
+def tracking(request):
+    if request.content_type == "application/json":
+        data = json.loads(request.body)
+    if request.method == "GET":
+        try:
+            active_tracking = ERDates.objects.get(user=request.user.id, active=True)
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "no data",
+                            "data": None
+                            }, status=200)
+        entry, renewal, online_start, online_end = convert_to_timestamp(active_tracking.entry, active_tracking.renewal, active_tracking.online_start, active_tracking.online_end)
+        return JsonResponse({"status": "successful",
+                            "data":{"id": active_tracking.id,
+                                    "entry": entry, 
+                                    "renewal": renewal,
+                                    "online_start": online_start,
+                                    "online_end": online_end}
+                            }, status=200)
+    elif request.method == "POST":
+        mode = data.get("mode")
+        if mode == "renewal":
+            renewal = datetime.fromtimestamp(int(data.get("renewal")))
+            return new_renewal_date(renewal, request.user)
+
+        elif mode == "entry":
+            entry = datetime.fromtimestamp(int(data.get("entry")))
+            renewal = entry + timedelta(days=90)
+            online_start = renewal - timedelta(days=14)
+            online_end = renewal - timedelta(days=7)
+            try:
+                erdate = ERDates.objects.create(user=request.user, entry=entry, renewal=renewal, online_start=online_start, online_end=online_end)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+            entry, renewal, online_start, online_end = convert_to_timestamp(erdate.entry, erdate.renewal, erdate.online_start, erdate.online_end)
+            return JsonResponse({   "status": "successful",
+                                    "data": {   "id": erdate.id,
+                                                "entry": entry, 
+                                                "renewal": renewal, 
+                                                "online_start": online_start,
+                                                "online_end": online_end}
+                                }, status=200)
+
+    elif request.method == "PUT":
+        mode = data.get("mode")
+        if mode == "departure":
+            departure_date = datetime.fromtimestamp(int(data.get("date")))
+            ERDate_id = int(data.get("id"))
+            try:
+                erdate = ERDates.objects.filter(id=ERDate_id, active=True, user=request.user.id).update(departure=departure_date, active=False)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+
+            return JsonResponse({   "status": "successful",
+                                    "data": None
+                                }, status=200)
+        elif mode == "reported":
+            reported_date = datetime.fromtimestamp(int(data.get("reported_date")))
+            ERDate_id = int(data.get("id"))
+            try:
+                erdate = ERDates.objects.filter(id=ERDate_id, active=True, user=request.user.id).update(reported_date=reported_date, active=False)
+            except IntegrityError as e:
+                print(e)
+                return JsonResponse({"error":e}, status=400)
+            # If update is successful, create a new tracking record from the reported date. 
+            # TODO refractor this into a function
+            reported_date = reported_date + timedelta(days=90)
+            return new_renewal_date(reported_date, request.user)
+            
+    elif request.method == "DELETE":
+        ERDate_id = data.get("id")
+        try:
+            erdate = ERDates.objects.get(id=ERDate_id, active=True, user=request.user.id).delete()
+        except IntegrityError as e:
+            print(e)
+            return JsonResponse({"error":e}, status=400)
+        
+        # If delete is successful
+        return JsonResponse({   "status": "successful",
+                                "data": None
+                            }, status=200)
+
+
+@ensure_csrf_cookie
+def history(request):
+    if request.content_type == "application/json":
+        data = json.loads(request.body)
+    if request.method == "GET":
+        tracking_history = ERDates.objects.filter(user=request.user.id, active=False).order_by('-id')
+        data = [entry.serialize() for entry in tracking_history]
+        return JsonResponse({"status": "successful",
+                            "data": data
+                            }, status=200)
+    
+    elif request.method == "PUT":
+        if data.get("mode") == "undo":
+            try:
+                ERDates.objects.get(user=request.user.id, active=True)
+            except ObjectDoesNotExist:
+                ERDates.objects.filter(id=data.get("id"), active=False).update(active=True, reported_date=None, departure=None)
+                tracking_history = ERDates.objects.filter(user=request.user.id, active=False).order_by('-id')
+                data = [entry.serialize() for entry in tracking_history]
+                return JsonResponse({"status": "successful",
+                                    "data": data
+                                    }, status=200)
+            
+            return JsonResponse({"status": "Error",
+                                "msg":"Active tracking data"
+                                }, status=400)
+
+@login_required
+def main(request):
+    if request.method == "GET":
+        return render(request, "taskproductivity/main.html")

@@ -6,11 +6,14 @@ class ViewBaseCase(TestCase):
     def setUp(self):
         self.client = Client(enforce_csrf_checks=True)
     
-    def _csrf_post(self, url, data, json=False):
+    def _get_csrf(self, url):
         resp = self.client.get(url)
         if resp.status_code != 200:
             resp = self.client.get('/')
-        csfrtoken = resp.cookies['csrftoken'].value
+        return resp.cookies['csrftoken'].value
+
+    def _csrf_post(self, url, data, json=False):
+        csfrtoken = self._get_csrf(url)
 
         # If the post is JSON based.
         if json:
@@ -18,6 +21,28 @@ class ViewBaseCase(TestCase):
         else:
             data['csrfmiddlewaretoken'] = csfrtoken
             response = self.client.post(url, data)
+        return response
+
+    def _csrf_put(self, url, data, json=False):
+        csfrtoken = self._get_csrf(url)
+
+        # If the put is JSON based.
+        if json:
+            response = self.client.put(url, data, content_type="application/json", HTTP_X_CSRFTOKEN=csfrtoken)
+        else:
+            data['csrfmiddlewaretoken'] = csfrtoken
+            response = self.client.put(url, data)
+        return response
+    
+    def _csrf_delete(self, url, data, json=False):
+        csfrtoken = self._get_csrf(url)
+
+        # If the put is JSON based.
+        if json:
+            response = self.client.delete(url, data, content_type="application/json", HTTP_X_CSRFTOKEN=csfrtoken)
+        else:
+            data['csrfmiddlewaretoken'] = csfrtoken
+            response = self.client.delete(url, data)
         return response
 
     def _setup_default_user(self):

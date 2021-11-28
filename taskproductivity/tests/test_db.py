@@ -25,6 +25,10 @@ class ModelsTestCase(TestCase):
         self.assertIsNotNone(self.erdate.edit_date)
         self.assertIsNone(self.erdate.entry)
         self.assertIsNone(self.erdate.renewal)
+        self.assertIsNone(self.erdate.departure)
+        self.assertIsNone(self.erdate.reported_date)
+        self.assertIsNone(self.erdate.online_start)
+        self.assertIsNone(self.erdate.online_end)
 
     def test_recovery_count(self):
         """Check the count of recovery"""

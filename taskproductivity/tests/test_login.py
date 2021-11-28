@@ -52,7 +52,7 @@ class ViewTestCase(ViewBaseCase):
         }
         response = self._csrf_post("/login", data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/tasks")
+        self.assertEqual(response.url, "/main")
 
 
 class UITestCase(UIBaseCase):
