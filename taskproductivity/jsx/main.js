@@ -273,10 +273,10 @@ class Tracking extends React.Component {
             const strNumDateStart = this.numDate(tmpRenewal);
             tmpRenewal.setDate(tmpRenewal.getDate() + 1);
             const strNumDateEnd = this.numDate(tmpRenewal);
-            gCalRenewal = "https://calendar.google.com/calendar/r/eventedit?text=Online+90+Days+Reporting&dates="+strNumDateStart+"/"+strNumDateEnd+"&ctz=Asia/Bangkok";
+            gCalRenewal = "https://calendar.google.com/calendar/r/eventedit?text=90+Days+Reporting+Deadline&dates="+strNumDateStart+"/"+strNumDateEnd+"&ctz=Asia/Bangkok";
         }
-
-        const gCalOnline = "https://calendar.google.com/calendar/r/eventedit?text=90+Days+Reporting+Deadline&dates="+gCalOnlineStart+"/"+gCalOnlineEnd+"&ctz=Asia/Bangkok"
+        
+        const gCalOnline = "https://calendar.google.com/calendar/r/eventedit?text=Online+90+Days+Reporting&dates="+gCalOnlineStart+"/"+gCalOnlineEnd+"&ctz=Asia/Bangkok"
 
         return (
             <div>
