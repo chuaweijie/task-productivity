@@ -8,6 +8,19 @@ def send_email(email_data, template_id):
     api_key = getenv("MAILJET_KEY")
     api_secret = getenv("MAILJET_SECRET")
     mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+    variables = None
+
+    # Different data to send to mailjet for different templates
+    if template_id == 3221171:
+        variables = {
+                "password_reset_button": email_data["password_reset_button"],
+                "password_reset_link": email_data["password_reset_link"],
+            }
+    elif template_id == 3930904 or template_id == 3936662:
+         variables = {
+                "day_num": email_data["day_num"],
+            }
+
     data = {
         'Messages': [
             {
@@ -24,10 +37,7 @@ def send_email(email_data, template_id):
                 "TemplateID": template_id,
                 "TemplateLanguage": True,
                 "Subject": email_data["subject"],
-                "Variables": {
-                    "password_reset_button": email_data["password_reset_button"],
-                    "password_reset_link": email_data["password_reset_link"],
-                }
+                "Variables": variables
             }
         ]
     }
