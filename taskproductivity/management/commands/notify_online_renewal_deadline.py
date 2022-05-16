@@ -24,17 +24,23 @@ class Command(BaseCommand):
                 "subject": "90 Days Reporting Tracker - Online Notification of Staying in the Kingdom Reminder",
                 "day_num": "7 days",
             }
+
+            result = "No Result"
              
             if timezone.now().date() - er_date.online_start == timedelta(days=0):
-                send_email(email_data, 3930904)
+                result = send_email(email_data, 3930904)
             elif timezone.now().date() - er_date.online_end == timedelta(days=0):
                 email_data["day_num"] = "the last day"
-                send_email(email_data, 3930904)
+                result = send_email(email_data, 3930904)
             elif timezone.now().date() - er_date.renewal == timedelta(days=-6):
                 email_data["subject"] = "90 Days Reporting Tracker - Notification of Staying in the Kingdom Reminder"
                 email_data["day_num"] = "6 days"
-                send_email(email_data, 3936662)
+                result = send_email(email_data, 3936662)
             elif timezone.now().date() - er_date.renewal == timedelta(days=0):
                 email_data["subject"] = "90 Days Reporting Tracker - Notification of Staying in the Kingdom Reminder"
                 email_data["day_num"] = "the last day"
-                send_email(email_data, 3936662)
+                result = send_email(email_data, 3936662)
+            
+            if result != "No Result":
+                print(result.status_code)
+                print(result.json())
