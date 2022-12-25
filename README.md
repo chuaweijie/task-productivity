@@ -1,3 +1,5 @@
+# I've recently realized that I've misunderstood the regulation regarding the 90 days reporting. If one goes to another country with a re-entry, 90 days reporting is sitll in force hence rendering this system unnecessary. Lastly, Immigration Bureau of Thailand updated their system to include email notification about your next reporting date thus rendering this system redundant. I will archive this project.
+
 # 90 Days Reporting Tracker
 ## Introduction
 For expats who work in Thailand and travels a lot, the [Notification of staying in the Kingdom over 90 days](https://www.immigration.go.th/en/?page_id=1666) can be a hassle for the following scenarios.
